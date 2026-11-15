@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-sans: "Public Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-navy-950: #090f1d;
+  --color-navy-900: #0f172a;
+  --color-navy-800: #1e3a8a;
+  --color-gold-500: #f59e0b;
+  --color-gold-600: #d97706;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Custom sleek scrollbars for wide AMI spreadsheet grids */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Print / Official PDF Report Styling */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 12mm 14mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .print-break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-full-width {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .print-modal-root {
+    position: static !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+
+  .print-modal-card,
+  .print-modal-scroll {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+  }
+}
