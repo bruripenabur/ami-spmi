@@ -30,6 +30,7 @@ interface TabFormulirPtkRtlProps {
     patch: Partial<AmiEvaluation>
   ) => void;
   onPrint: () => void;
+  canExport?: boolean;
 }
 
 export const TabFormulirPtkRtl: React.FC<TabFormulirPtkRtlProps> = ({
@@ -44,6 +45,7 @@ export const TabFormulirPtkRtl: React.FC<TabFormulirPtkRtlProps> = ({
   currentUserName = 'Dekan Fakultas',
   onUpdateEvaluation,
   onPrint,
+  canExport = false,
 }) => {
   const isAuditor = canEditDates !== undefined ? canEditDates : role === 'auditor';
 
@@ -167,14 +169,16 @@ export const TabFormulirPtkRtl: React.FC<TabFormulirPtkRtlProps> = ({
               Disetujui Dekan (Semua {pendingApproveCount} Butir)
             </button>
           )}
-          <button
-            type="button"
-            onClick={onPrint}
-            className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition-colors"
-          >
-            <Printer className="h-4 w-4 text-amber-400" />
-            Cetak Formulir PTK/RTL
-          </button>
+          {canExport && (
+            <button
+              type="button"
+              onClick={onPrint}
+              className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition-colors"
+            >
+              <Printer className="h-4 w-4 text-amber-400" />
+              Cetak Formulir PTK/RTL
+            </button>
+          )}
         </div>
       </div>
 

@@ -12,7 +12,11 @@ import {
   SsoUserProfile,
   StudyProgramIdentity,
 } from '../types/ami';
-import { AMI_STANDARDS } from '../data/amiInstrumentData';
+import {
+  AMI_STANDARDS,
+  AMI_INDICATORS,
+  AMI_INDICATORS_KEPENDIDIKAN,
+} from '../data/amiInstrumentData';
 import { UNPATTI_118_PROGRAMS } from '../data/unpattiPrograms118';
 
 export const SUPABASE_URL = 'https://eysccwxpgdcoqfvaalye.supabase.co';
@@ -305,6 +309,10 @@ export async function fetchProdiFromSupabase(): Promise<StudyProgramIdentity[]> 
     from += pageSize;
   }
 
+  if (allRows.length === 0) {
+    return UNPATTI_118_PROGRAMS;
+  }
+
   return allRows.map(mapProdiRowToIdentity);
 }
 
@@ -436,6 +444,13 @@ export async function fetchIndicatorsFromSupabase(): Promise<
     allRows.push(...rows);
     if (rows.length < pageSize) break;
     from += pageSize;
+  }
+
+  if (allRows.length === 0) {
+    return {
+      'Non-Kependidikan': AMI_INDICATORS,
+      Kependidikan: AMI_INDICATORS_KEPENDIDIKAN,
+    };
   }
 
   const nonKependidikan: AmiIndicator[] = [];

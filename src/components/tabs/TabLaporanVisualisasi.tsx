@@ -24,6 +24,7 @@ interface TabLaporanVisualisasiProps {
   overall: OverallAmiRecap;
   onPrintPdf: () => void;
   onExportExcel: () => void;
+  canExport?: boolean;
 }
 
 export const TabLaporanVisualisasi: React.FC<TabLaporanVisualisasiProps> = ({
@@ -33,6 +34,7 @@ export const TabLaporanVisualisasi: React.FC<TabLaporanVisualisasiProps> = ({
   overall,
   onPrintPdf,
   onExportExcel,
+  canExport = false,
 }) => {
   // Chart 1 data: Horizontal Grouped Bar Chart (Jumlah Temuan per Standar)
   const findingsChartData = [...recaps]
@@ -71,24 +73,26 @@ export const TabLaporanVisualisasi: React.FC<TabLaporanVisualisasiProps> = ({
             Siap dicetak sebagai PDF resmi LPMPP Universitas Pattimura atau diunduh ke Excel.
           </p>
         </div>
-        <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={onExportExcel}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50 transition-colors"
-          >
-            <FileSpreadsheet className="h-4 w-4 text-emerald-700" />
-            Export Excel (.xlsx)
-          </button>
-          <button
-            type="button"
-            onClick={onPrintPdf}
-            className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition-colors"
-          >
-            <Printer className="h-4 w-4 text-amber-400" />
-            Cetak / Export PDF
-          </button>
-        </div>
+        {canExport && (
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={onExportExcel}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50 transition-colors"
+            >
+              <FileSpreadsheet className="h-4 w-4 text-emerald-700" />
+              Export Excel (.xlsx)
+            </button>
+            <button
+              type="button"
+              onClick={onPrintPdf}
+              className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition-colors"
+            >
+              <Printer className="h-4 w-4 text-amber-400" />
+              Cetak / Export PDF
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Printable Official Header */}

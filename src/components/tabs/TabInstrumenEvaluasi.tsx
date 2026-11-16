@@ -16,6 +16,7 @@ import {
   AmiStandard,
   JenisProdi,
   KategoriTemuan,
+  RbacRole,
   RubricLevelKey,
   UserRole,
 } from '../../types/ami';
@@ -35,6 +36,7 @@ interface TabInstrumenEvaluasiProps {
   evaluations: Record<string, AmiEvaluation>;
   jenisProdi?: JenisProdi;
   role: UserRole;
+  userRbacRole?: RbacRole;
   canScore?: boolean;
   canEditEvidence?: boolean;
   canCrudIndicators?: boolean;
@@ -54,6 +56,7 @@ interface TabInstrumenEvaluasiProps {
   onAddIndicator: (indicator: AmiIndicator) => void;
   onUpdateIndicator: (indicator: AmiIndicator) => void;
   onDeleteIndicator: (indicatorId: string) => void;
+  canExport?: boolean;
 }
 
 const SCORE_LEVELS: RubricLevelKey[] = [1, 2, 3, 4, 5, 6, 7];
@@ -71,6 +74,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
   evaluations,
   jenisProdi = 'Non-Kependidikan',
   role,
+  userRbacRole,
   canScore,
   canEditEvidence,
   canCrudIndicators = true,
@@ -87,6 +91,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
   onAddIndicator,
   onUpdateIndicator,
   onDeleteIndicator,
+  canExport = false,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [kategoriFilter, setKategoriFilter] = useState<string>('all');
@@ -100,6 +105,8 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
   const isAuditor = canScore !== undefined ? canScore : role === 'auditor';
   const allowEvidence =
     canEditEvidence !== undefined ? canEditEvidence : role === 'auditee';
+  const isKaprodi =
+    userRbacRole === 'kaprodi' || (!isAuditor && role === 'auditee');
   const allowPtk = canEditPtk !== undefined ? canEditPtk : true;
   const allowDates = canEditPlorCa !== undefined ? canEditPlorCa : isAuditor;
 
@@ -121,7 +128,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
             ev.target_1_yr,
             ev.kategori_override
           );
-          if (kategoriFilter !== 'all' && kat !== kategoriFilter) return false;
+          if (!isKaprodi && kategoriFilter !== 'all' && kat !== kategoriFilter) return false;
           if (!q) return true;
           return (
             ind.code.toLowerCase().includes(q) ||
@@ -133,7 +140,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
         return { standard: std, rows };
       })
       .filter((g) => g.rows.length > 0);
-  }, [visibleStandards, indicators, evaluations, activeStandardFilter, searchQuery, kategoriFilter]);
+  }, [visibleStandards, indicators, evaluations, activeStandardFilter, searchQuery, kategoriFilter, isKaprodi]);
 
   return (
     <div className="space-y-4">
@@ -143,7 +150,9 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-base font-bold text-slate-900">
-                Instrumen Evaluasi Diri &amp; Penilaian Auditor ({visibleStandards.length} Standar SPMI)
+                {isKaprodi
+                  ? `Instrumen Evaluasi Diri Program Studi (${visibleStandards.length} Standar SPMI)`
+                  : `Instrumen Evaluasi Diri & Penilaian Auditor (${visibleStandards.length} Standar SPMI)`}
               </h2>
               <span
                 className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-semibold ${
@@ -154,10 +163,17 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
               >
                 Instrumen {jenisProdi} ({indicators.length} Indikator)
               </span>
+              {isKaprodi && (
+                <span className="inline-flex items-center rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-900">
+                  Tampilan Kaprodi (6 Kolom Mutu)
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               {roleSummaryNote ||
-                (isAuditor
+                (isKaprodi
+                  ? 'Hak Akses Kaprodi (Auditee) aktif: Isi opsi keadaan prodi saat ini (rubrik 1–7), nilai capaian, target 1 tahun yad, dan unggah tautan bukti dokumen.'
+                  : isAuditor
                   ? 'Hak Akses Penilaian aktif: skor capaian, opsi keadaan prodi saat ini, analisis PLOR+CA, dan jadwal PTK dapat diisi.'
                   : allowEvidence
                   ? 'Hak Akses Prodi aktif: unggah tautan bukti dokumen, target 1 tahun, dan rencana PTK/RTL.'
@@ -166,7 +182,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {canCrudIndicators && (
+            {!isKaprodi && canCrudIndicators && (
               <button
                 type="button"
                 onClick={() =>
@@ -178,39 +194,43 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                 Tambah Indikator
               </button>
             )}
-            <button
-              type="button"
-              onClick={onDownloadTemplate}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-blue-900 bg-blue-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-950 transition-colors whitespace-nowrap"
-            >
-              <Download className="h-3.5 w-3.5 text-amber-400" />
-              Unduh Template Instrumen (.xlsx)
-            </button>
+            {(userRbacRole === 'admin' || canExport) && (
+              <button
+                type="button"
+                onClick={onDownloadTemplate}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-blue-900 bg-blue-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-950 transition-colors whitespace-nowrap"
+              >
+                <Download className="h-3.5 w-3.5 text-amber-400" />
+                Unduh Template Instrumen (.xlsx)
+              </button>
+            )}
             <div className="relative">
               <Search className="h-3.5 w-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari indikator, uraian, PTK..."
+                placeholder={isKaprodi ? "Cari indikator, uraian..." : "Cari indikator, uraian, PTK..."}
                 className="w-56 rounded-lg border border-slate-300 bg-white pl-8 pr-3 py-1.5 text-xs text-slate-900 focus:border-blue-800 focus:outline-none"
               />
             </div>
-            <div className="flex items-center gap-1.5">
-              <SlidersHorizontal className="h-3.5 w-3.5 text-slate-500" />
-              <select
-                value={kategoriFilter}
-                onChange={(e) => setKategoriFilter(e.target.value)}
-                className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-blue-800 focus:outline-none"
-              >
-                <option value="all">Semua Kategori</option>
-                <option value="Mayor">Mayor</option>
-                <option value="Minor">Minor</option>
-                <option value="Observasi">Observasi</option>
-                <option value="Sesuai (Baik)">Sesuai (Baik)</option>
-                <option value="Best Practice">Best Practice</option>
-              </select>
-            </div>
+            {!isKaprodi && (
+              <div className="flex items-center gap-1.5">
+                <SlidersHorizontal className="h-3.5 w-3.5 text-slate-500" />
+                <select
+                  value={kategoriFilter}
+                  onChange={(e) => setKategoriFilter(e.target.value)}
+                  className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-blue-800 focus:outline-none"
+                >
+                  <option value="all">Semua Kategori</option>
+                  <option value="Mayor">Mayor</option>
+                  <option value="Minor">Minor</option>
+                  <option value="Observasi">Observasi</option>
+                  <option value="Sesuai (Baik)">Sesuai (Baik)</option>
+                  <option value="Best Practice">Best Practice</option>
+                </select>
+              </div>
+            )}
           </div>
         </div>
 
@@ -283,53 +303,78 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1460px] border-collapse text-left text-xs">
+              <table
+                className={`w-full ${
+                  isKaprodi ? 'min-w-[960px]' : 'min-w-[1460px]'
+                } border-collapse text-left text-xs`}
+              >
                 <thead className="sticky top-0 z-10 bg-slate-100 text-slate-700 border-b border-slate-200">
-                  <tr>
-                    <th className="px-3 py-2.5 font-semibold w-14">No</th>
-                    <th className="px-3 py-2.5 font-semibold w-64">
-                      Uraian Indikator
-                    </th>
-                    <th className="px-3 py-2.5 font-semibold w-72">
-                      Keadaan Prodi Saat Ini (Klik Rubrik 1–7)
-                    </th>
-                    <th className="px-2.5 py-2.5 font-semibold text-center w-20">
-                      Nilai Capaian
-                    </th>
-                    <th className="px-3 py-2.5 font-semibold w-36">
-                      Sebutan Capaian
-                    </th>
-                    <th className="px-2.5 py-2.5 font-semibold text-center w-20">
-                      Target 1 Th yad
-                    </th>
-                    <th className="px-3 py-2.5 font-semibold w-36">
-                      Sebutan Target
-                    </th>
-                    <th className="px-3 py-2.5 font-semibold w-32">
-                      Kategori Temuan
-                    </th>
-                    <th className="px-3 py-2.5 font-semibold w-56">
-                      Akar Masalah / Penunjang (PLOR+CA)
-                    </th>
-                    <th className="px-3 py-2.5 font-semibold w-48">
-                      PTK / RTL
-                    </th>
-                    <th className="px-3 py-2.5 font-semibold w-36">PIC</th>
-                    <th className="px-3 py-2.5 font-semibold w-32">
-                      Waktu Selesai PTK
-                    </th>
-                    <th className="px-3 py-2.5 font-semibold w-32">
-                      Waktu Monev
-                    </th>
-                    <th className="px-3 py-2.5 font-semibold w-44">
-                      Bukti Link Dokumen
-                    </th>
-                    {canCrudIndicators && (
-                      <th className="px-3 py-2.5 font-semibold text-center w-24">
-                        Aksi
+                  {isKaprodi ? (
+                    <tr>
+                      <th className="px-3 py-2.5 font-semibold w-16">No</th>
+                      <th className="px-3 py-2.5 font-semibold w-80">
+                        Uraian Indikator
                       </th>
-                    )}
-                  </tr>
+                      <th className="px-3 py-2.5 font-semibold w-96">
+                        Keadaan Prodi Saat Ini (Klik Rubrik 1–7)
+                      </th>
+                      <th className="px-2.5 py-2.5 font-semibold text-center w-24">
+                        Nilai Capaian
+                      </th>
+                      <th className="px-2.5 py-2.5 font-semibold text-center w-24">
+                        Target 1 Th yad
+                      </th>
+                      <th className="px-3 py-2.5 font-semibold w-72">
+                        Bukti Link Dokumen (opsional)
+                      </th>
+                    </tr>
+                  ) : (
+                    <tr>
+                      <th className="px-3 py-2.5 font-semibold w-14">No</th>
+                      <th className="px-3 py-2.5 font-semibold w-64">
+                        Uraian Indikator
+                      </th>
+                      <th className="px-3 py-2.5 font-semibold w-72">
+                        Keadaan Prodi Saat Ini (Klik Rubrik 1–7)
+                      </th>
+                      <th className="px-2.5 py-2.5 font-semibold text-center w-20">
+                        Nilai Capaian
+                      </th>
+                      <th className="px-3 py-2.5 font-semibold w-36">
+                        Sebutan Capaian
+                      </th>
+                      <th className="px-2.5 py-2.5 font-semibold text-center w-20">
+                        Target 1 Th yad
+                      </th>
+                      <th className="px-3 py-2.5 font-semibold w-36">
+                        Sebutan Target
+                      </th>
+                      <th className="px-3 py-2.5 font-semibold w-32">
+                        Kategori Temuan
+                      </th>
+                      <th className="px-3 py-2.5 font-semibold w-56">
+                        Akar Masalah / Penunjang (PLOR+CA)
+                      </th>
+                      <th className="px-3 py-2.5 font-semibold w-48">
+                        PTK / RTL
+                      </th>
+                      <th className="px-3 py-2.5 font-semibold w-36">PIC</th>
+                      <th className="px-3 py-2.5 font-semibold w-32">
+                        Waktu Selesai PTK
+                      </th>
+                      <th className="px-3 py-2.5 font-semibold w-32">
+                        Waktu Monev
+                      </th>
+                      <th className="px-3 py-2.5 font-semibold w-44">
+                        Bukti Link Dokumen
+                      </th>
+                      {canCrudIndicators && (
+                        <th className="px-3 py-2.5 font-semibold text-center w-24">
+                          Aksi
+                        </th>
+                      )}
+                    </tr>
+                  )}
                 </thead>
                 <tbody className="divide-y divide-slate-200">
                   {rows.map((ind) => {
@@ -344,6 +389,150 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                         ev.plor_ca.objectiveEvidence ||
                         ev.plor_ca.action
                     );
+
+                    if (isKaprodi) {
+                      return (
+                        <tr
+                          key={ind.id}
+                          className="align-top hover:bg-slate-50/70 transition-colors"
+                        >
+                          {/* 1. No */}
+                          <td className="px-3 py-3 font-mono font-semibold text-slate-900 tabular-nums">
+                            {ind.code}
+                          </td>
+
+                          {/* 2. Uraian Indikator */}
+                          <td className="px-3 py-3 text-slate-800 leading-relaxed">
+                            {ind.uraian}
+                          </td>
+
+                          {/* 3. Keadaan Prodi Saat Ini (Klik Rubrik 1–7) */}
+                          <td className="px-3 py-3">
+                            <div className="space-y-1.5">
+                              <select
+                                aria-label={`Opsi Keadaan Prodi ${ind.code}`}
+                                value={ev.nilai_capaian ?? ''}
+                                onChange={(e) =>
+                                  onUpdateEvaluation(ind.id, {
+                                    nilai_capaian: e.target.value
+                                      ? (Number(e.target.value) as RubricLevelKey)
+                                      : null,
+                                  })
+                                }
+                                className="w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-[11px] font-medium text-slate-800 focus:border-blue-800 focus:outline-none"
+                              >
+                                <option value="">-- Pilih Kondisi Prodi Saat Ini (1-7) --</option>
+                                {SCORE_LEVELS.map((lvl) => (
+                                  <option key={lvl} value={lvl}>
+                                    {lvl}. {ind.rubric_levels[lvl]}
+                                  </option>
+                                ))}
+                              </select>
+                              <button
+                                type="button"
+                                onClick={() => onOpenRubric(ind)}
+                                className="group w-full text-left rounded-md border border-slate-200 bg-slate-50/60 hover:border-blue-700 hover:bg-blue-50/40 p-2 transition-colors"
+                              >
+                                <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-blue-900 mb-1">
+                                  <span className="inline-flex items-center gap-1">
+                                    <BookOpen className="h-3 w-3" />
+                                    {ev.nilai_capaian !== null
+                                      ? `Skor ${ev.nilai_capaian}`
+                                      : 'Belum Dinilai'}
+                                  </span>
+                                  <span className="text-slate-400 group-hover:text-blue-700">
+                                    Lihat Rubrik →
+                                  </span>
+                                </div>
+                                <p className="text-xs text-slate-700 leading-snug line-clamp-3">
+                                  {ev.nilai_capaian !== null
+                                    ? ind.rubric_levels[ev.nilai_capaian]
+                                    : 'Belum ada isian nilai capaian. Klik untuk melihat deskripsi rubrik skala 1–7.'}
+                                </p>
+                              </button>
+                            </div>
+                          </td>
+
+                          {/* 4. Nilai Capaian */}
+                          <td className="px-2.5 py-3 text-center">
+                            <select
+                              aria-label={`Nilai capaian ${ind.code}`}
+                              value={ev.nilai_capaian ?? ''}
+                              onChange={(e) =>
+                                onUpdateEvaluation(ind.id, {
+                                  nilai_capaian: e.target.value
+                                    ? (Number(e.target.value) as RubricLevelKey)
+                                    : null,
+                                })
+                              }
+                              className={`w-14 rounded-md border px-1.5 py-1.5 text-center font-mono font-bold tabular-nums focus:outline-none ${getScoreCellClasses(
+                                ev.nilai_capaian
+                              )}`}
+                            >
+                              <option value="">-</option>
+                              {SCORE_LEVELS.map((lvl) => (
+                                <option key={lvl} value={lvl}>
+                                  {lvl}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+
+                          {/* 5. Target 1 Th yad */}
+                          <td className="px-2.5 py-3 text-center">
+                            <select
+                              aria-label={`Target 1 tahun ${ind.code}`}
+                              value={ev.target_1_yr ?? ''}
+                              onChange={(e) =>
+                                onUpdateEvaluation(ind.id, {
+                                  target_1_yr: e.target.value
+                                    ? (Number(e.target.value) as RubricLevelKey)
+                                    : null,
+                                })
+                              }
+                              className={`w-14 rounded-md border px-1.5 py-1.5 text-center font-mono font-bold tabular-nums focus:outline-none ${getScoreCellClasses(
+                                ev.target_1_yr
+                              )}`}
+                            >
+                              <option value="">-</option>
+                              {SCORE_LEVELS.map((lvl) => (
+                                <option key={lvl} value={lvl}>
+                                  {lvl}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+
+                          {/* 6. Bukti Link Dokumen (opsional) */}
+                          <td className="px-3 py-3">
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="url"
+                                value={ev.bukti_link}
+                                onChange={(e) =>
+                                  onUpdateEvaluation(ind.id, {
+                                    bukti_link: e.target.value,
+                                  })
+                                }
+                                placeholder="https://drive.google.com/..."
+                                className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-800 focus:border-blue-800 focus:outline-none"
+                              />
+                              {ev.bukti_link && (
+                                <a
+                                  href={ev.bukti_link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="rounded border border-slate-200 bg-slate-50 p-1.5 text-blue-800 hover:bg-blue-50 shrink-0"
+                                  title="Buka tautan dokumen bukti"
+                                >
+                                  <ExternalLink className="h-3.5 w-3.5" />
+                                </a>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    }
 
                     return (
                       <tr

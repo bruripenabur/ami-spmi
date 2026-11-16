@@ -71,6 +71,7 @@ interface TabDashboardPpeppProps {
   onSelectProgram: (programId: string) => void;
   onExportExcel: () => void;
   onPrintPdf: () => void;
+  canExport?: boolean;
 }
 
 export const TabDashboardPpepp: React.FC<TabDashboardPpeppProps> = ({
@@ -91,6 +92,7 @@ export const TabDashboardPpepp: React.FC<TabDashboardPpeppProps> = ({
   onSelectProgram,
   onExportExcel,
   onPrintPdf,
+  canExport = false,
 }) => {
   const canOpenTab = (tab: AmiTabId) => !allowedTabs || allowedTabs.includes(tab);
   const [trendRange, setTrendRange] = useState<'active_to_past' | 'all_cycles'>(
@@ -744,24 +746,26 @@ export const TabDashboardPpepp: React.FC<TabDashboardPpeppProps> = ({
                 {effectivenessLabel}
               </div>
             </div>
-            <div className="no-print flex flex-col gap-2">
-              <button
-                type="button"
-                onClick={onExportExcel}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50 transition-colors"
-              >
-                <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-700" />
-                Unduh Excel AMI
-              </button>
-              <button
-                type="button"
-                onClick={onPrintPdf}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition-colors"
-              >
-                <Printer className="h-3.5 w-3.5 text-amber-400" />
-                Cetak Ringkasan
-              </button>
-            </div>
+            {canExport && (
+              <div className="no-print flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={onExportExcel}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50 transition-colors"
+                >
+                  <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-700" />
+                  Unduh Excel AMI
+                </button>
+                <button
+                  type="button"
+                  onClick={onPrintPdf}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition-colors"
+                >
+                  <Printer className="h-3.5 w-3.5 text-amber-400" />
+                  Cetak Ringkasan
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

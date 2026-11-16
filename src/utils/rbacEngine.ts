@@ -20,43 +20,49 @@ export const RBAC_ROLE_META: Record<
     title: 'Kaprodi (Auditee)',
     shortLabel: 'Kaprodi',
     badgeClass: 'bg-blue-50 text-blue-900 border-blue-200',
-    summary: 'Mengelola identitas prodi, unggah bukti instrumen, pengisian PTK/RTL & realisasi Monev (terkunci 1 prodi).',
+    summary: 'Mengelola identitas prodi, mengisi target & bukti dokumen pada instrumen standar (terkunci 1 prodi).',
   },
   auditor: {
-    title: 'Auditor (Tim AMI Internal)',
-    shortLabel: 'Auditor AMI',
+    title: 'Auditor & Lead Auditor',
+    shortLabel: 'Auditor & Lead Auditor',
     badgeClass: 'bg-amber-50 text-amber-900 border-amber-300',
-    summary: 'Menilai instrumen standar, mengisi temuan PLOR+CA, dan verifikasi akhir Monev pada prodi binaan SK.',
+    summary: 'Menilai instrumen standar (14 kolom), mengisi temuan PLOR+CA, rekap, laporan grafik, dan daftar temuan AMI.',
+  },
+  pimpinan: {
+    title: 'Pimpinan',
+    shortLabel: 'Pimpinan',
+    badgeClass: 'bg-indigo-900 text-amber-300 border-indigo-700',
+    summary: 'Akses eksekutif untuk Dashboard PPEPP dan Perengkingan & Klasterisasi Mutu.',
   },
   dekanat: {
-    title: 'Dekanat (Pimpinan Fakultas)',
-    shortLabel: 'Dekanat',
-    badgeClass: 'bg-indigo-50 text-indigo-900 border-indigo-200',
-    summary: 'Memantau seluruh prodi fakultas, memberi catatan fakultas & menyetujui formulir PTK/RTL sebelum Monev.',
+    title: 'Pimpinan (Dekanat)',
+    shortLabel: 'Pimpinan',
+    badgeClass: 'bg-indigo-900 text-amber-300 border-indigo-700',
+    summary: 'Akses eksekutif untuk Dashboard PPEPP dan Perengkingan & Klasterisasi Mutu.',
   },
   rektorat: {
-    title: 'Rektorat (Pimpinan Universitas)',
-    shortLabel: 'Rektorat',
+    title: 'Pimpinan (Rektorat)',
+    shortLabel: 'Pimpinan',
     badgeClass: 'bg-slate-900 text-amber-300 border-slate-700',
-    summary: 'Akses eksekutif Read-Only untuk Dashboard PPEPP, Rekap, Grafik & Laporan AMI/RTM seluruh 118 prodi.',
+    summary: 'Akses eksekutif untuk Dashboard PPEPP dan Perengkingan & Klasterisasi Mutu.',
   },
   lembaga: {
     title: 'Lembaga (LPMPP / LPPM)',
     shortLabel: 'Lembaga',
     badgeClass: 'bg-emerald-50 text-emerald-900 border-emerald-200',
-    summary: 'Monitoring lintas 118 prodi sesuai fokus lembaga (LPMPP Pendidikan/SPMI atau LPPM Riset/PkM) & status siklus.',
+    summary: 'Monitoring lintas 118 prodi sesuai fokus lembaga & status siklus.',
   },
   pusat: {
     title: 'Pusat (Unit Pusat LPMPP/LPPM)',
     shortLabel: 'Pusat',
     badgeClass: 'bg-teal-50 text-teal-900 border-teal-200',
-    summary: 'Analisis mendalam indikator 118 prodi sesuai klaster standar unit pusat (tanpa ubah prodi/siklus/pengguna).',
+    summary: 'Analisis mendalam indikator 118 prodi sesuai klaster standar unit pusat.',
   },
   asesor_lam: {
     title: 'Asesor LAM (Eksternal)',
     shortLabel: 'Asesor LAM',
     badgeClass: 'bg-purple-50 text-purple-900 border-purple-300',
-    summary: 'Mode Read-Only eksternal terbatas pada prodi & siklus yang ditugaskan Admin (Dashboard, Grafik, Laporan SPMI).',
+    summary: 'Mode Read-Only eksternal terbatas pada prodi & siklus yang ditugaskan Admin (Dashboard, Laporan, Laporan SPMI).',
   },
   asesor_banpt: {
     title: 'Asesor BAN-PT (Eksternal)',
@@ -65,10 +71,10 @@ export const RBAC_ROLE_META: Record<
     summary: 'Mode Read-Only eksternal tingkat PT (118 prodi & semua siklus) untuk evaluasi makro & RTM.',
   },
   admin: {
-    title: 'Admin (Super Admin)',
-    shortLabel: 'Super Admin',
+    title: 'Admin & Superadmin',
+    shortLabel: 'Admin & Superadmin',
     badgeClass: 'bg-red-50 text-red-900 border-red-200',
-    summary: 'Kontrol penuh seluruh modul, manajemen pengguna multi-role, mapping SK Auditor & izin Asesor LAM.',
+    summary: 'Kontrol penuh seluruh modul (11 modul lengkap + manajemen pengguna & sistem).',
   },
 };
 
@@ -126,14 +132,7 @@ export function computeRbacPermissions(
           'dashboard',
           'identitas',
           'instrumen',
-          'rekap',
-          'laporan',
-          'temuan',
-          'ptk',
-          'monev',
           'panduan',
-          'perengkingan',
-          'laporan_spmi',
         ],
         canCreateProdi: false,
         canEditIdentitas: true,
@@ -149,7 +148,7 @@ export function computeRbacPermissions(
         canManageCycleStatus: false,
         canManageUsers: false,
         canSyncSupabase: false,
-        canExportReports: true,
+        canExportReports: false,
       };
     }
 
@@ -179,11 +178,7 @@ export function computeRbacPermissions(
           'rekap',
           'laporan',
           'temuan',
-          'ptk',
-          'monev',
           'panduan',
-          'perengkingan',
-          'laporan_spmi',
         ],
         canCreateProdi: false,
         canEditIdentitas: false,
@@ -199,43 +194,34 @@ export function computeRbacPermissions(
         canManageCycleStatus: false,
         canManageUsers: false,
         canSyncSupabase: true,
-        canExportReports: true,
+        canExportReports: false,
       };
     }
 
-    case 'dekanat': {
-      const fac = assignment.fakultas ?? allPrograms[0]?.fakultas ?? '';
-      const facProdiIds = allPrograms
-        .filter((p) => p.fakultas === fac)
-        .map((p) => p.id);
+    case 'pimpinan':
+    case 'dekanat':
+    case 'rektorat': {
       return {
         role,
         assignment,
         legacyMode: 'auditor',
-        roleDisplayName: meta.title,
+        roleDisplayName: 'Pimpinan',
         badgeColorClass: meta.badgeClass,
         isExternalAssessor: false,
-        isStrictReadOnly: false,
+        isStrictReadOnly: true,
         readOnlyBanner:
-          'Mode Pimpinan Fakultas (Dekanat): Pantau rekap fakultas & berikan persetujuan resmi pada modul 06. Formulir PTK / RTL.',
-        scopeLabel: `Terkunci Fakultas: ${fac} (${facProdiIds.length} Prodi)`,
-        lockFakultas: true,
+          'Mode Eksekutif Pimpinan: Akses Dashboard PPEPP serta Perengkingan & Klasterisasi Mutu PPEPP.',
+        scopeLabel:
+          'Pimpinan: Monitoring Eksekutif Seluruh Program Studi & Mutu PPEPP (Universitas Pattimura)',
+        lockFakultas: false,
         lockProdi: false,
-        allowedFakultas: fac ? [fac] : 'all',
-        allowedProdiIds: facProdiIds,
+        allowedFakultas: 'all',
+        allowedProdiIds: 'all',
         allowedCycleYears: 'all',
         allowedStandardIds: 'all',
         allowedTabs: [
           'dashboard',
-          'identitas',
-          'rekap',
-          'laporan',
-          'temuan',
-          'ptk',
-          'monev',
-          'panduan',
           'perengkingan',
-          'laporan_spmi',
         ],
         canCreateProdi: false,
         canEditIdentitas: false,
@@ -251,52 +237,9 @@ export function computeRbacPermissions(
         canManageCycleStatus: false,
         canManageUsers: false,
         canSyncSupabase: false,
-        canExportReports: true,
+        canExportReports: false,
       };
     }
-
-    case 'rektorat':
-      return {
-        role,
-        assignment,
-        legacyMode: 'auditor',
-        roleDisplayName: meta.title,
-        badgeColorClass: meta.badgeClass,
-        isExternalAssessor: false,
-        isStrictReadOnly: true,
-        readOnlyBanner:
-          'Mode Eksekutif Rektorat (Read-Only): Tampilan agregat 118 Program Studi & Rapat Tinjauan Manajemen (RTM).',
-        scopeLabel: 'Global: Semua Fakultas & 118 Program Studi',
-        lockFakultas: false,
-        lockProdi: false,
-        allowedFakultas: 'all',
-        allowedProdiIds: 'all',
-        allowedCycleYears: 'all',
-        allowedStandardIds: 'all',
-        allowedTabs: [
-          'dashboard',
-          'rekap',
-          'laporan',
-          'perengkingan',
-          'laporan_spmi',
-          'panduan',
-        ],
-        canCreateProdi: false,
-        canEditIdentitas: false,
-        canEditInstrumenEvidence: false,
-        canScoreInstrumen: false,
-        canCrudIndicators: false,
-        canEditPlorCa: false,
-        canEditPtkDraft: false,
-        canSubmitPtkToDekan: false,
-        canApprovePtkDekan: false,
-        canUploadMonevEvidence: false,
-        canVerifyMonevClosed: false,
-        canManageCycleStatus: false,
-        canManageUsers: false,
-        canSyncSupabase: false,
-        canExportReports: true,
-      };
 
     case 'lembaga': {
       const entity = assignment.lembagaEntity ?? 'LPMPP';
@@ -350,7 +293,7 @@ export function computeRbacPermissions(
         canManageCycleStatus: true,
         canManageUsers: false,
         canSyncSupabase: true,
-        canExportReports: true,
+        canExportReports: false,
       };
     }
 
@@ -401,7 +344,7 @@ export function computeRbacPermissions(
         canManageCycleStatus: false,
         canManageUsers: false,
         canSyncSupabase: false,
-        canExportReports: true,
+        canExportReports: false,
       };
     }
 
@@ -440,7 +383,7 @@ export function computeRbacPermissions(
         canManageCycleStatus: false,
         canManageUsers: false,
         canSyncSupabase: false,
-        canExportReports: true,
+        canExportReports: false,
       };
     }
 
@@ -483,7 +426,7 @@ export function computeRbacPermissions(
         canManageCycleStatus: false,
         canManageUsers: false,
         canSyncSupabase: false,
-        canExportReports: true,
+        canExportReports: false,
       };
 
     case 'admin':
@@ -537,6 +480,9 @@ export function computeRbacPermissions(
 }
 
 export function getDefaultTabForPermissions(perms: RbacPermissions): AmiTabId {
+  if (perms.allowedTabs.includes('dashboard')) {
+    return 'dashboard';
+  }
   return perms.allowedTabs[0] ?? 'dashboard';
 }
 
@@ -546,20 +492,36 @@ export function normalizeSsoRoleToRbacRole(rawRole: string): RbacRole {
     .toUpperCase()
     .replace(/[\s-]+/g, '_');
 
-  if (norm === 'SUPER_ADMIN' || norm === 'ADMIN_LPMPP' || norm === 'ADMIN') {
+  if (
+    norm === 'SUPER_ADMIN' ||
+    norm === 'ADMIN_LPMPP' ||
+    norm === 'ADMIN' ||
+    norm === 'SUPERADMIN' ||
+    norm === 'SUPER_ADMINISTRATOR'
+  ) {
     return 'admin';
   }
   if (norm === 'KAPRODI' || norm === 'AUDITEE') {
     return 'kaprodi';
   }
-  if (norm === 'AUDITOR_AMI' || norm === 'AUDITOR') {
+  if (
+    norm === 'AUDITOR_AMI' ||
+    norm === 'AUDITOR' ||
+    norm === 'LEAD_AUDITOR' ||
+    norm === 'LEADAUDITOR'
+  ) {
     return 'auditor';
   }
-  if (norm === 'DEKANAT' || norm === 'DEKAN') {
-    return 'dekanat';
-  }
-  if (norm === 'REKTORAT' || norm === 'REKTOR') {
-    return 'rektorat';
+  if (
+    norm === 'PIMPINAN' ||
+    norm === 'DEKANAT' ||
+    norm === 'DEKAN' ||
+    norm === 'REKTORAT' ||
+    norm === 'REKTOR' ||
+    norm === 'WAKIL_REKTOR' ||
+    norm === 'WR'
+  ) {
+    return 'pimpinan';
   }
   if (norm === 'LEMBAGA' || norm === 'LPMPP' || norm === 'LPPM') {
     return 'lembaga';
@@ -597,14 +559,10 @@ export function buildPermissionsFromSsoProfile(
   allPrograms: StudyProgramIdentity[]
 ): RbacPermissions {
   const rbacRole = normalizeSsoRoleToRbacRole(profile.role);
-  const rawRoleUpper = String(profile.role ?? '')
-    .trim()
-    .toUpperCase();
   const unitTrim = String(profile.unit_kode ?? '').trim();
 
   if (rbacRole === 'admin') {
-    const roleLabel =
-      rawRoleUpper === 'ADMIN_LPMPP' ? 'Admin LPMPP' : 'Super Admin';
+    const roleLabel = 'Admin & Superadmin';
     const base = computeRbacPermissions(
       {
         id: profile.id,
@@ -617,26 +575,40 @@ export function buildPermissionsFromSsoProfile(
     return {
       ...base,
       roleDisplayName: roleLabel,
-      scopeLabel: `${roleLabel}: Kontrol Penuh Semua Fakultas, Jenis Prodi & Program Studi`,
+      allowedTabs: [
+        'dashboard',
+        'identitas',
+        'instrumen',
+        'rekap',
+        'laporan',
+        'temuan',
+        'ptk',
+        'monev',
+        'panduan',
+        'perengkingan',
+        'laporan_spmi',
+        'manajemen',
+      ],
+      scopeLabel: `${roleLabel}: Kontrol Penuh Seluruh Modul, Fakultas & Program Studi`,
     };
   }
 
   if (rbacRole === 'kaprodi') {
-    const matchedProdi = findProgramByUnitKode(unitTrim, allPrograms);
+    const matchedProdi =
+      findProgramByUnitKode(unitTrim, allPrograms) ?? allPrograms[0];
     const assignment: RoleAssignment = {
       id: profile.id,
       role: 'kaprodi',
-      label: 'Kaprodi',
+      label: 'Kaprodi (Auditee)',
       unitName:
         matchedProdi?.nama_prodi || profile.jabatan || unitTrim || 'Program Studi',
       prodiId: matchedProdi?.id,
       fakultas: matchedProdi?.fakultas,
     };
     const base = computeRbacPermissions(assignment, allPrograms);
-    // Strictly lock Fakultas, Jenis Prodi, and Prodi to user's unit_kode (no fallback to unrelated prodi if unmatched)
     return {
       ...base,
-      roleDisplayName: 'Kaprodi',
+      roleDisplayName: 'Kaprodi (Auditee)',
       lockFakultas: true,
       lockProdi: true,
       allowedFakultas: matchedProdi ? [matchedProdi.fakultas] : [],
@@ -647,7 +619,12 @@ export function buildPermissionsFromSsoProfile(
       canCreateProdi: false,
       canCrudIndicators: false,
       canManageUsers: false,
-      allowedTabs: base.allowedTabs.filter((t) => t !== 'manajemen'),
+      allowedTabs: [
+        'dashboard',
+        'identitas',
+        'instrumen',
+        'panduan',
+      ],
     };
   }
 
@@ -669,7 +646,6 @@ export function buildPermissionsFromSsoProfile(
         if (matched) {
           assignedProdiIds.push(matched.id);
         } else {
-          // Check if token matches a faculty name
           const facProdis = allPrograms.filter(
             (p) => p.fakultas.trim().toLowerCase() === tok.toLowerCase()
           );
@@ -697,7 +673,7 @@ export function buildPermissionsFromSsoProfile(
       {
         id: profile.id,
         role: 'auditor',
-        label: 'Auditor AMI',
+        label: 'Auditor & Lead Auditor',
         unitName: profile.jabatan || 'Tim Auditor AMI UNPATTI',
         assignedProdiIds:
           effectiveAllowedProdis === 'all' ? undefined : effectiveAllowedProdis,
@@ -707,7 +683,7 @@ export function buildPermissionsFromSsoProfile(
 
     return {
       ...base,
-      roleDisplayName: 'Auditor AMI',
+      roleDisplayName: 'Auditor & Lead Auditor',
       lockFakultas: false,
       lockProdi:
         effectiveAllowedProdis !== 'all' && effectiveAllowedProdis.length <= 1,
@@ -721,75 +697,56 @@ export function buildPermissionsFromSsoProfile(
       canCrudIndicators: false,
       canManageUsers: false,
       canSyncSupabase: false,
-      allowedTabs: base.allowedTabs.filter((t) => t !== 'manajemen'),
+      allowedTabs: [
+        'dashboard',
+        'identitas',
+        'instrumen',
+        'rekap',
+        'laporan',
+        'temuan',
+        'panduan',
+      ],
     };
   }
 
-  if (rbacRole === 'dekanat') {
-    const matchedFac =
-      allPrograms.find(
-        (p) => p.fakultas.trim().toLowerCase() === unitTrim.toLowerCase()
-      )?.fakultas ??
-      findProgramByUnitKode(unitTrim, allPrograms)?.fakultas ??
-      unitTrim;
-    return computeRbacPermissions(
+  if (rbacRole === 'pimpinan' || rbacRole === 'dekanat' || rbacRole === 'rektorat') {
+    const base = computeRbacPermissions(
       {
         id: profile.id,
-        role: 'dekanat',
-        label: 'Dekanat',
-        unitName: profile.jabatan || matchedFac || 'Pimpinan Fakultas',
-        fakultas: matchedFac,
+        role: 'pimpinan',
+        label: 'Pimpinan',
+        unitName: profile.jabatan || 'Pimpinan Universitas Pattimura',
       },
       allPrograms
     );
-  }
-
-  if (rbacRole === 'lembaga') {
-    const entity = rawRoleUpper === 'LPPM' || unitTrim.toUpperCase() === 'LPPM' ? 'LPPM' : 'LPMPP';
-    return computeRbacPermissions(
-      {
-        id: profile.id,
-        role: 'lembaga',
-        label: `Lembaga (${entity})`,
-        unitName: profile.jabatan || entity,
-        lembagaEntity: entity,
-      },
-      allPrograms
-    );
-  }
-
-  if (rbacRole === 'pusat') {
-    return computeRbacPermissions(
-      {
-        id: profile.id,
-        role: 'pusat',
-        label: 'Pusat',
-        unitName: profile.jabatan || unitTrim || 'Unit Pusat LPMPP',
-        pusatName: profile.jabatan || unitTrim || 'Unit Pusat LPMPP',
-      },
-      allPrograms
-    );
-  }
-
-  if (rbacRole === 'asesor_lam') {
-    const matched = findProgramByUnitKode(unitTrim, allPrograms);
-    return computeRbacPermissions(
-      {
-        id: profile.id,
-        role: 'asesor_lam',
-        label: 'Asesor LAM',
-        unitName: profile.jabatan || 'Asesor Eksternal LAM',
-        assignedProdiIds: matched ? [matched.id] : allPrograms.map((p) => p.id),
-      },
-      allPrograms
-    );
+    return {
+      ...base,
+      roleDisplayName: 'Pimpinan',
+      scopeLabel:
+        'Pimpinan: Monitoring Eksekutif Seluruh Program Studi & Mutu PPEPP (Universitas Pattimura)',
+      lockFakultas: false,
+      lockProdi: false,
+      allowedFakultas: 'all',
+      allowedProdiIds: 'all',
+      allowedTabs: [
+        'dashboard',
+        'perengkingan',
+      ],
+      canCreateProdi: false,
+      canCrudIndicators: false,
+      canManageUsers: false,
+      canScoreInstrumen: false,
+      canEditIdentitas: false,
+      canEditInstrumenEvidence: false,
+      canExportReports: false,
+    };
   }
 
   return computeRbacPermissions(
     {
       id: profile.id,
       role: rbacRole,
-      label: RBAC_ROLE_META[rbacRole].shortLabel,
+      label: RBAC_ROLE_META[rbacRole]?.shortLabel ?? 'Pengguna',
       unitName: profile.jabatan || 'Universitas Pattimura',
     },
     allPrograms

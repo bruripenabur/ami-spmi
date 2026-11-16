@@ -87,6 +87,7 @@ interface TabLaporanSpmiProps {
   lockProdi: boolean;
   canViewUniversityReport: boolean;
   roleDisplayName: string;
+  canExport?: boolean;
 }
 
 const REPORT_CARDS: {
@@ -144,6 +145,7 @@ export const TabLaporanSpmi: React.FC<TabLaporanSpmiProps> = ({
   lockProdi = false,
   canViewUniversityReport = false,
   roleDisplayName = '',
+  canExport = false,
 }) => {
   const [scopeLevel, setScopeLevel] = useState<SpmiReportScopeLevel>('prodi');
   const [selectedFakultas, setSelectedFakultas] = useState<string>(
@@ -504,24 +506,28 @@ export const TabLaporanSpmi: React.FC<TabLaporanSpmiProps> = ({
               <SlidersHorizontal className="h-3.5 w-3.5" />
               {showEditor ? 'Tutup Editor Metadata' : 'Edit Metadata & Narasi'}
             </button>
-            <button
-              type="button"
-              disabled={busyDocx}
-              onClick={handleExportDocx}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-900 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-950 disabled:opacity-60 transition-colors"
-            >
-              <FileType2 className="h-4 w-4 text-amber-300" />
-              {busyDocx ? 'Membuat Word...' : 'Export Word (.docx)'}
-            </button>
-            <button
-              type="button"
-              disabled={busyPdf}
-              onClick={handleExportPdf}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-amber-400 disabled:opacity-60 transition-colors"
-            >
-              <FileDown className="h-4 w-4" />
-              {busyPdf ? 'Membuat PDF...' : 'Export PDF (.pdf)'}
-            </button>
+            {canExport && (
+              <>
+                <button
+                  type="button"
+                  disabled={busyDocx}
+                  onClick={handleExportDocx}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-blue-900 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-950 disabled:opacity-60 transition-colors"
+                >
+                  <FileType2 className="h-4 w-4 text-amber-300" />
+                  {busyDocx ? 'Membuat Word...' : 'Export Word (.docx)'}
+                </button>
+                <button
+                  type="button"
+                  disabled={busyPdf}
+                  onClick={handleExportPdf}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-amber-400 disabled:opacity-60 transition-colors"
+                >
+                  <FileDown className="h-4 w-4" />
+                  {busyPdf ? 'Membuat PDF...' : 'Export PDF (.pdf)'}
+                </button>
+              </>
+            )}
           </div>
         </div>
 

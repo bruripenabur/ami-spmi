@@ -231,6 +231,7 @@ export interface ProdiRankingEntry {
 export type RbacRole =
   | 'kaprodi'
   | 'auditor'
+  | 'pimpinan'
   | 'dekanat'
   | 'rektorat'
   | 'lembaga'
