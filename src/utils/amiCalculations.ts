@@ -127,6 +127,7 @@ export function computeStandardRecaps(
       nama: std.nama,
       bobot: std.bobot,
       indicatorCount: stdIndicators.length,
+      evaluatedCount: capaianCount,
       avgCapaianRaw: Number(avgCapaianRaw.toFixed(2)),
       avgTargetRaw: Number(avgTargetRaw.toFixed(2)),
       nilaiCapaian,

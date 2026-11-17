@@ -16,6 +16,7 @@ interface RubricDrawerProps {
   canEditScore?: boolean;
   canEditTarget?: boolean;
   roleLabel?: string;
+  showToast?: (msg: string) => void;
   onClose: () => void;
   onUpdate: (
     indicatorId: string,
@@ -35,6 +36,7 @@ export const RubricDrawer: React.FC<RubricDrawerProps> = ({
   canEditScore = true,
   canEditTarget = true,
   roleLabel,
+  showToast,
   onClose,
   onUpdate,
 }) => {

@@ -14,6 +14,7 @@ import {
   AmiEvaluation,
   AmiIndicator,
   AmiStandard,
+  AuditLogEntry,
   JenisProdi,
   KategoriTemuan,
   RbacRole,
@@ -34,6 +35,7 @@ interface TabInstrumenEvaluasiProps {
   standards: AmiStandard[];
   indicators: AmiIndicator[];
   evaluations: Record<string, AmiEvaluation>;
+  auditLogs?: AuditLogEntry[];
   jenisProdi?: JenisProdi;
   role: UserRole;
   userRbacRole?: RbacRole;
@@ -72,6 +74,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
   standards,
   indicators,
   evaluations,
+  auditLogs,
   jenisProdi = 'Non-Kependidikan',
   role,
   userRbacRole,
@@ -865,6 +868,37 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
           setDeleteTarget(null);
         }}
       />
+
+      {/* Audit Log / Riwayat Perubahan Panel */}
+      {auditLogs && auditLogs.length > 0 && (
+        <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-slate-900">
+              Riwayat Perubahan (Log Audit) — Instrumen & Evaluasi
+            </h3>
+            <span className="text-xs font-mono text-slate-500">
+              {auditLogs.length} Aktivitas Tercatat
+            </span>
+          </div>
+          <div className="max-h-60 overflow-y-auto divide-y divide-slate-100 text-xs">
+            {auditLogs.map((log) => (
+              <div key={log.id} className="py-2.5 flex flex-wrap items-center justify-between gap-2">
+                <div className="space-y-0.5">
+                  <div className="font-semibold text-slate-900">
+                    {log.userName} <span className="text-slate-500 font-normal">({log.roleDisplayName})</span> — <span className="text-blue-900 font-mono">{log.indicatorCode}</span>: {log.action}
+                  </div>
+                  <div className="text-[11px] text-slate-600">
+                    Sebelum: <span className="font-mono text-slate-800">{log.beforeVal}</span> → Sesudah: <span className="font-mono text-slate-900 font-semibold">{log.afterVal}</span>
+                  </div>
+                </div>
+                <div className="text-[11px] font-mono text-slate-400">
+                  {log.timestamp}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

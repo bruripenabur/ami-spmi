@@ -472,6 +472,7 @@ export function computeAggregatedSpmiBundle(params: {
       nama: acc.standard.nama,
       bobot: acc.standard.bobot,
       indicatorCount: acc.indicatorCount,
+      evaluatedCount: acc.evaluatedProdis,
       avgCapaianRaw,
       avgTargetRaw,
       nilaiCapaian,

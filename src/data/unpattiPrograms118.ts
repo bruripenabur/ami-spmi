@@ -348,6 +348,8 @@ export const UNPATTI_118_PROGRAMS: StudyProgramIdentity[] = COMPACT_SPECS.map(
       ? 'PLO-1: Menguasai teori oseanografi, ekologi laut tropis, dan metode survei bawah air.\nPLO-2: Mampu merancang analisis spasial kelautan dan konservasi sumber daya pesisir.\nPLO-3: Mampu bekerja di lapangan laut dengan standar keselamatan dan etika ilmiah.'
       : `PLO-1: Menguasai konsep teoretis dan metodologi mutakhir bidang ${spec.nama_prodi}.\nPLO-2: Mampu merumuskan solusi permasalahan profesional secara analitis, etis, dan berbasis data kepulauan.\nPLO-3: Mampu berkolaborasi lintas disiplin, berkomunikasi efektif, dan belajar sepanjang hayat.`;
 
+    const cplDefault = `CPL-1: Mampu menerapkan pengetahuan bidang keilmuan ${spec.nama_prodi} dalam penyelesaian masalah berbasis penalaran ilmiah dan perancangan sistem.\nCPL-2: Mampu menunjukkan akuntabilitas profesional, etika akademik, dan karakter kepulauan dalam praktik keprofesian.`;
+
     const kaprodiName = isInformatika
       ? KAPRODI_NAMES[0]
       : isIlmuKelautan
@@ -416,6 +418,7 @@ export const UNPATTI_118_PROGRAMS: StudyProgramIdentity[] = COMPACT_SPECS.map(
       visi_prodi: visiDefault,
       misi_prodi: misiDefault,
       kompetensi_lulusan: ploDefault,
+      cpl_prodi: cplDefault,
       kriteria_lulusan: {
         sks_minimal: criteria.sks,
         nilai_d_maksimal: 2,
@@ -447,6 +450,9 @@ export const UNPATTI_118_PROGRAMS: StudyProgramIdentity[] = COMPACT_SPECS.map(
       tahun_siklus_ppepp: '2025/2026',
       tempat_pengesahan: 'Ambon',
       tahun_pengesahan: '2025',
+      iku_target: 'IKU-1 Lulusan Mendapat Pekerjaan Layak (Target >= 80%); IKU-2 Mahasiswa Berkegiatan di Luar Kampus (Target >= 30%).',
+      ikt_syarat_unggul: 'Persentase kelulusan tepat waktu >= 50%, IPK rata-rata lulusan >= 3.00, publikasi ilmiah mahasiswa.',
+      ikk_internasional: 'Status Akreditasi Internasional: Persiapan / Terakreditasi ACQUIN / ASIIN.',
     };
   }
 );

@@ -59,6 +59,7 @@ export const NewProdiModal: React.FC<NewProdiModalProps> = ({
       visi_prodi: '',
       misi_prodi: '',
       kompetensi_lulusan: '',
+      cpl_prodi: '',
       kriteria_lulusan: {
         sks_minimal: 144,
         nilai_d_maksimal: 2,
@@ -80,6 +81,9 @@ export const NewProdiModal: React.FC<NewProdiModalProps> = ({
       tahun_siklus_ppepp: '2025/2026',
       tempat_pengesahan: 'Ambon',
       tahun_pengesahan: '2025',
+      iku_target: '',
+      ikt_syarat_unggul: '',
+      ikk_internasional: '',
     };
 
     onCreate(newProdi);

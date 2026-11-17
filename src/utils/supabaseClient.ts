@@ -228,6 +228,7 @@ function buildFallbackProgramIdentity(row: PpeppProdiRow): StudyProgramIdentity 
     visi_prodi: `Menjadi program studi ${nama} yang unggul, berkarakter kepulauan, dan berdaya saing nasional menuju kawasan Indo-Pasifik.`,
     misi_prodi: `1. Menyelenggarakan pembelajaran bermutu berbasis OBE di bidang ${nama}.\n2. Menghasilkan riset terapan dan publikasi ilmiah yang berkontribusi pada pembangunan masyarakat Maluku.\n3. Memperluas jejaring kemitraan pendidikan, pemerintah daerah, dan DUDI secara berkelanjutan.`,
     kompetensi_lulusan: `PLO-1: Menguasai konsep teoretis dan metodologi mutakhir bidang ${nama}.\nPLO-2: Mampu merumuskan solusi permasalahan profesional secara analitis, etis, dan berbasis data kepulauan.\nPLO-3: Mampu berkolaborasi lintas disiplin, berkomunikasi efektif, dan belajar sepanjang hayat.`,
+    cpl_prodi: `CPL-1: Mampu menerapkan pengetahuan bidang keilmuan ${nama} dalam penyelesaian masalah berbasis penalaran ilmiah.\nCPL-2: Mampu menunjukkan akuntabilitas profesional, etika akademik, dan karakter kepulauan dalam praktik keprofesian.`,
     kriteria_lulusan: {
       sks_minimal: 144,
       nilai_d_maksimal: 2,
@@ -255,6 +256,9 @@ function buildFallbackProgramIdentity(row: PpeppProdiRow): StudyProgramIdentity 
     tahun_siklus_ppepp: '2025/2026',
     tempat_pengesahan: 'Ambon',
     tahun_pengesahan: '2026',
+    iku_target: 'IKU-1 Lulusan Mendapat Pekerjaan Layak (Target >= 80%); IKU-2 Mahasiswa Berkegiatan di Luar Kampus (Target >= 30%); IKU-3 Dosen Berkegiatan di Luar Kampus (Target >= 25%).',
+    ikt_syarat_unggul: 'Syarat Perlu Unggul LAM / BAN-PT: Persentase kelulusan tepat waktu >= 50%, IPK rata-rata lulusan >= 3.00, publikasi ilmiah mahasiswa.',
+    ikk_internasional: 'Status Akreditasi Internasional: Belum / Dalam Persiapan (ACQUIN / ASIIN).',
   };
 }
 

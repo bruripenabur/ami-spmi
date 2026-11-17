@@ -63,6 +63,7 @@ export interface StudyProgramIdentity {
   visi_prodi: string;
   misi_prodi: string;
   kompetensi_lulusan: string;
+  cpl_prodi: string;
   kriteria_lulusan: {
     sks_minimal: number;
     nilai_d_maksimal: number;
@@ -90,6 +91,9 @@ export interface StudyProgramIdentity {
   tahun_siklus_ppepp: string;
   tempat_pengesahan: string;
   tahun_pengesahan: string;
+  iku_target: string;
+  ikt_syarat_unggul: string;
+  ikk_internasional: string;
 }
 
 export interface AmiStandard {
@@ -149,6 +153,7 @@ export interface StandardRecap {
   nama: string;
   bobot: number;
   indicatorCount: number;
+  evaluatedCount: number;
   avgCapaianRaw: number;
   avgTargetRaw: number;
   nilaiCapaian: number; // 0-100 scale
@@ -163,6 +168,17 @@ export interface StandardRecap {
     'Sesuai (Baik)': number;
     'Best Practice': number;
   };
+}
+
+export interface AuditCalendarEvent {
+  id: string;
+  nama_kegiatan: string;
+  tahapan_siklus: string;
+  tanggal_mulai: string;
+  tanggal_tenggat: string;
+  unit_prodi: string;
+  status: 'Selesai' | 'Akan Datang' | 'Minggu Ini' | 'Terlambat';
+  keterangan: string;
 }
 
 export interface OverallAmiRecap {
@@ -364,5 +380,17 @@ export interface SpmiReportMeta {
   saran: string;
   rtmDecisions: RtmDecisionItem[];
   standardUpgrades: StandardUpgradeItem[];
+}
+
+export interface AuditLogEntry {
+  id: string;
+  timestamp: string;
+  userEmail: string;
+  userName: string;
+  roleDisplayName: string;
+  indicatorCode: string;
+  action: string;
+  beforeVal: string;
+  afterVal: string;
 }
 

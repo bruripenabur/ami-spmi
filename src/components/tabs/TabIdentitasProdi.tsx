@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock, Building2, GraduationCap, Users, FileCheck2 } from 'lucide-react';
+import { Lock, Building2, GraduationCap, Users, FileCheck2, Award } from 'lucide-react';
 import {
   JenisProdi,
   PeringkatAkreditasi,
@@ -92,7 +92,7 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
         <div className="flex items-center gap-2.5 border-b border-slate-200 bg-slate-50 px-6 py-3.5">
           <Building2 className="h-4 w-4 text-blue-900" />
           <h3 className="text-sm font-semibold text-slate-900">
-            01. Identitas Perguruan Tinggi & Pengelola Pembelajaran
+            01. Identitas Perguruan Tinggi &amp; Pengelola Pembelajaran
           </h3>
         </div>
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -134,7 +134,7 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1">
-              4. Alamat Pusat & Kode Pos
+              4. Alamat Pusat &amp; Kode Pos
             </label>
             <div className="flex gap-2">
               <input
@@ -188,7 +188,7 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
         <div className="flex items-center gap-2.5 border-b border-slate-200 bg-slate-50 px-6 py-3.5">
           <FileCheck2 className="h-4 w-4 text-blue-900" />
           <h3 className="text-sm font-semibold text-slate-900">
-            02. Identitas, Legalitas SK & Riwayat Akreditasi Program Studi
+            02. Identitas, Legalitas SK &amp; Riwayat Akreditasi Program Studi
           </h3>
         </div>
         <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -396,7 +396,7 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
-                17. Telepon & Website
+                17. Telepon &amp; Website
               </label>
               <div className="space-y-1.5">
                 <input
@@ -426,7 +426,7 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
         <div className="flex items-center gap-2.5 border-b border-slate-200 bg-slate-50 px-6 py-3.5">
           <GraduationCap className="h-4 w-4 text-blue-900" />
           <h3 className="text-sm font-semibold text-slate-900">
-            03. Visi, Misi, Kompetensi Lulusan (PLO) & Kriteria Lulusan
+            03. Visi, Misi, Kompetensi Lulusan (PLO) &amp; Kriteria Lulusan
           </h3>
         </div>
         <div className="p-6 space-y-4">
@@ -471,9 +471,24 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
             </div>
           </div>
 
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">
+              21. CPL Program Studi
+            </label>
+            <textarea
+              rows={4}
+              disabled={isReadOnly}
+              value={program.cpl_prodi}
+              onChange={(e) =>
+                updateField('cpl_prodi', e.target.value)
+              }
+              className={inputClass}
+            />
+          </div>
+
           <div className="pt-2 border-t border-slate-100">
             <div className="text-xs font-semibold text-slate-600 mb-2">
-              21. Kriteria Lulusan Program Studi
+              22. Kriteria Lulusan Program Studi
             </div>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               <div>
@@ -572,14 +587,14 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
         <div className="flex items-center gap-2.5 border-b border-slate-200 bg-slate-50 px-6 py-3.5">
           <Users className="h-4 w-4 text-blue-900" />
           <h3 className="text-sm font-semibold text-slate-900">
-            04. Data Mahasiswa, Dosen (Berbasis PDDIKTI) & Tenaga Kependidikan
+            04. Data Mahasiswa, Dosen (Berbasis PDDIKTI) &amp; Tenaga Kependidikan
           </h3>
         </div>
         <div className="p-6 space-y-5">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
-                22. Mahasiswa pada TS
+                23. Mahasiswa pada TS
               </label>
               <input
                 type="number"
@@ -593,7 +608,7 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
-                23. Jumlah Lulusan TS
+                24. Jumlah Lulusan TS
               </label>
               <input
                 type="number"
@@ -607,7 +622,7 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
-                24. Dosen Homebase TS
+                25. Dosen Homebase TS
               </label>
               <input
                 type="number"
@@ -624,7 +639,7 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
-                25. Dosen Tetap PS TS
+                26. Dosen Tetap PS TS
               </label>
               <input
                 type="number"
@@ -641,7 +656,7 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
-                26. Dosen Tidak Tetap TS
+                27. Dosen Tidak Tetap TS
               </label>
               <input
                 type="number"
@@ -660,7 +675,7 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
 
           <div className="pt-3 border-t border-slate-100">
             <div className="text-xs font-semibold text-slate-600 mb-2">
-              27. Jumlah Tenaga Kependidikan Berdasarkan Kualifikasi Pendidikan
+              28. Jumlah Tenaga Kependidikan Berdasarkan Kualifikasi Pendidikan
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               {(['s3', 's2', 's1', 'diploma', 'sma'] as const).map((lvl) => (
@@ -687,18 +702,69 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
         </div>
       </section>
 
-      {/* Section E: Identitas Kaprodi & Official Sign-off Block */}
+      {/* Section E: Penetapan Standar / Sasaran Mutu Lainnya (IKU / IKT / IKK) */}
+      <section className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+        <div className="flex items-center gap-2.5 border-b border-slate-200 bg-slate-50 px-6 py-3.5">
+          <Award className="h-4 w-4 text-blue-900" />
+          <h3 className="text-sm font-semibold text-slate-900">
+            05. Penetapan Standar / Sasaran Mutu Lainnya (IKU / IKT / IKK)
+          </h3>
+        </div>
+        <div className="p-6 space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">
+              Indikator Kinerja Utama (IKU) Program Studi &amp; Target Pencapaian
+            </label>
+            <textarea
+              rows={2}
+              disabled={isReadOnly}
+              value={program.iku_target || ''}
+              onChange={(e) => updateField('iku_target', e.target.value)}
+              className={inputClass}
+              placeholder="Contoh: IKU-1 Lulusan Mendapat Pekerjaan Layak (Target >= 80%); IKU-2 Mahasiswa Berkegiatan di Luar Kampus (Target >= 30%)..."
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">
+              Indikator Kinerja Tambahan (IKT) — Syarat Perlu Unggul LAM / BAN-PT
+            </label>
+            <textarea
+              rows={2}
+              disabled={isReadOnly}
+              value={program.ikt_syarat_unggul || ''}
+              onChange={(e) => updateField('ikt_syarat_unggul', e.target.value)}
+              className={inputClass}
+              placeholder="Contoh: Persentase kelulusan tepat waktu >= 50%, IPK rata-rata lulusan >= 3.00, publikasi ilmiah mahasiswa..."
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">
+              Indikator Kinerja Khusus (IKK) — Akreditasi Internasional &amp; Internasionalisasi
+            </label>
+            <textarea
+              rows={2}
+              disabled={isReadOnly}
+              value={program.ikk_internasional || ''}
+              onChange={(e) => updateField('ikk_internasional', e.target.value)}
+              className={inputClass}
+              placeholder="Contoh: Status Akreditasi Internasional / Persiapan Lembaga (ACQUIN / ASIIN / AQAS)..."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Section F: Identitas Kaprodi & Official Sign-off Block */}
       <section className="rounded-xl border border-slate-200 bg-white overflow-hidden">
         <div className="border-b border-slate-200 bg-slate-50 px-6 py-3.5">
           <h3 className="text-sm font-semibold text-slate-900">
-            05. Identitas Ketua Program Studi & Blok Pengesahan Dekan
+            06. Identitas Ketua Program Studi &amp; Blok Pengesahan Dekan
           </h3>
         </div>
         <div className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
-                28a. Nama Lengkap Kaprodi dengan Gelar
+                29a. Nama Lengkap Kaprodi dengan Gelar
               </label>
               <input
                 type="text"
@@ -710,7 +776,7 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
-                28b. NIP Ketua Program Studi
+                29b. NIP Ketua Program Studi
               </label>
               <input
                 type="text"
@@ -722,7 +788,7 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
-                28c. No. Telp / HP Kaprodi
+                29c. No. Telp / HP Kaprodi
               </label>
               <input
                 type="text"
