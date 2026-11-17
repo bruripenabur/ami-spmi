@@ -256,9 +256,9 @@ function buildFallbackProgramIdentity(row: PpeppProdiRow): StudyProgramIdentity 
     tahun_siklus_ppepp: '2025/2026',
     tempat_pengesahan: 'Ambon',
     tahun_pengesahan: '2026',
-    iku_target: 'IKU-1 Lulusan Mendapat Pekerjaan Layak (Target >= 80%); IKU-2 Mahasiswa Berkegiatan di Luar Kampus (Target >= 30%); IKU-3 Dosen Berkegiatan di Luar Kampus (Target >= 25%).',
-    ikt_syarat_unggul: 'Syarat Perlu Unggul LAM / BAN-PT: Persentase kelulusan tepat waktu >= 50%, IPK rata-rata lulusan >= 3.00, publikasi ilmiah mahasiswa.',
-    ikk_internasional: 'Status Akreditasi Internasional: Belum / Dalam Persiapan (ACQUIN / ASIIN).',
+    iku_target: '',
+    ikt_syarat_unggul: '',
+    ikk_internasional: '',
   };
 }
 
@@ -354,6 +354,21 @@ export async function updateProdiInSupabase(
         nama_kaprodi: prodi.kaprodi_nama,
       })
       .eq('kode_prodi', prodi.kode_ps);
+    if (error) throw error;
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: formatSupabaseError(err) };
+  }
+}
+
+export async function deleteProdiInSupabase(
+  kodePs: string
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const { error } = await supabase
+      .from('ppepp_prodi')
+      .delete()
+      .eq('kode_prodi', kodePs);
     if (error) throw error;
     return { ok: true };
   } catch (err) {

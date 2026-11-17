@@ -58,6 +58,7 @@ import {
 import {
   clearLegacyLocalStorage,
   deleteIndicatorToSupabase,
+  deleteProdiInSupabase,
   fetchAllEvaluations,
   fetchAllUserProfiles,
   fetchIndicatorsFromSupabase,
@@ -1202,6 +1203,34 @@ export default function App() {
     showToast(`Program Studi ${created.nama_prodi} berhasil ditambahkan ke database.`);
   };
 
+  const handleUpdateProgramMaster = async (updated: StudyProgramIdentity) => {
+    setCloudStatus('saving');
+    const res = await updateProdiInSupabase(updated);
+    if (!res.ok) {
+      setCloudStatus('error');
+      showToast(`Gagal memperbarui prodi: ${res.error ?? 'Unknown'}`);
+      return;
+    }
+    setPrograms((prev) =>
+      sortProgramsByKode(prev.map((p) => (p.kode_ps === updated.kode_ps ? updated : p)))
+    );
+    setCloudStatus('saved');
+    showToast(`Program Studi ${updated.nama_prodi} berhasil diperbarui.`);
+  };
+
+  const handleDeleteProgramMaster = async (kodePs: string) => {
+    setCloudStatus('saving');
+    const res = await deleteProdiInSupabase(kodePs);
+    if (!res.ok) {
+      setCloudStatus('error');
+      showToast(`Gagal menghapus prodi: ${res.error ?? 'Unknown'}`);
+      return;
+    }
+    setPrograms((prev) => prev.filter((p) => p.kode_ps !== kodePs));
+    setCloudStatus('saved');
+    showToast(`Program Studi dengan kode ${kodePs} berhasil dihapus.`);
+  };
+
   const handleExportExcel = () => {
     if (!activeProgram || !activeCycle) return;
     exportAmiToExcel({
@@ -2222,6 +2251,8 @@ export default function App() {
                   onRefreshSsoProfiles={handleRefreshSsoProfiles}
                   onUpdateCycleStatus={handleUpdateCycleStatus}
                   onOpenNewProdiModal={() => setNewProdiModalOpen(true)}
+                  onUpdateProgram={handleUpdateProgramMaster}
+                  onDeleteProgram={handleDeleteProgramMaster}
                 />
               )}
 
