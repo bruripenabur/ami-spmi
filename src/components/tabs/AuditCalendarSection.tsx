@@ -2,15 +2,18 @@ import React, { useState, useMemo } from 'react';
 import { Calendar, Plus, Edit3, Trash2, Clock, CheckCircle2, AlertTriangle, FileSpreadsheet, X } from 'lucide-react';
 import { AuditCalendarEvent } from '../../types/ami';
 import { INITIAL_AUDIT_CALENDAR } from '../../data/auditCalendarData';
+import { Language } from '../../utils/i18n';
 
 interface AuditCalendarSectionProps {
   isAdmin?: boolean;
   showToast: (msg: string) => void;
+  lang?: Language;
 }
 
 export const AuditCalendarSection: React.FC<AuditCalendarSectionProps> = ({
   isAdmin = false,
   showToast,
+  lang = 'ID',
 }) => {
   const [events, setEvents] = useState<AuditCalendarEvent[]>(() => {
     try {
@@ -167,10 +170,14 @@ export const AuditCalendarSection: React.FC<AuditCalendarSectionProps> = ({
           </div>
           <div>
             <h3 className="text-base font-bold text-slate-900">
-              Kalender Audit &amp; Jadwal Siklus AMI PPEPP UNPATTI
+              {lang === 'EN'
+                ? 'Audit Calendar & AMI PPEPP UNPATTI Cycle Schedule'
+                : 'Kalender Audit & Jadwal Siklus AMI PPEPP UNPATTI'}
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              Jadwal komprehensif tenggat waktu dokumen, audit kecukupan, visitasi lapangan, PTK/RTL, hingga RTM.
+              {lang === 'EN'
+                ? 'Comprehensive schedule for document submissions, desk evaluation, field visitation, CAR/RTL, and MRM.'
+                : 'Jadwal komprehensif tenggat waktu dokumen, audit kecukupan, visitasi lapangan, PTK/RTL, hingga RTM.'}
             </p>
           </div>
         </div>
@@ -182,7 +189,7 @@ export const AuditCalendarSection: React.FC<AuditCalendarSectionProps> = ({
             className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50 transition-colors"
           >
             <FileSpreadsheet className="h-4 w-4 text-emerald-700" />
-            Ekspor ke CSV
+            {lang === 'EN' ? 'Export to CSV' : 'Ekspor ke CSV'}
           </button>
           {isAdmin && (
             <button
@@ -191,7 +198,7 @@ export const AuditCalendarSection: React.FC<AuditCalendarSectionProps> = ({
               className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-amber-400 transition-colors"
             >
               <Plus className="h-4 w-4" />
-              Tambah Agenda Audit
+              {lang === 'EN' ? 'Add Audit Agenda' : 'Tambah Agenda Audit'}
             </button>
           )}
         </div>
@@ -201,40 +208,46 @@ export const AuditCalendarSection: React.FC<AuditCalendarSectionProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-5">
           <div className="flex items-center justify-between text-xs font-semibold text-blue-900">
-            <span>Kegiatan 30 Hari Ke Depan</span>
+            <span>{lang === 'EN' ? 'Activities in Next 30 Days' : 'Kegiatan 30 Hari Ke Depan'}</span>
             <Clock className="h-4 w-4 text-blue-700" />
           </div>
           <div className="mt-2 text-3xl font-bold font-mono tabular-nums text-blue-950">
             {stats.next30DaysCount}
           </div>
           <p className="mt-1 text-[11px] text-blue-800">
-            Agenda audit dalam rentang 30 hari mendatang.
+            {lang === 'EN'
+              ? 'Audit agendas scheduled within the next 30 days.'
+              : 'Agenda audit dalam rentang 30 hari mendatang.'}
           </p>
         </div>
 
         <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-5">
           <div className="flex items-center justify-between text-xs font-semibold text-amber-900">
-            <span>Agenda Minggu Ini</span>
+            <span>{lang === 'EN' ? 'This Week Agenda' : 'Agenda Minggu Ini'}</span>
             <Calendar className="h-4 w-4 text-amber-700" />
           </div>
           <div className="mt-2 text-3xl font-bold font-mono tabular-nums text-amber-950">
             {stats.thisWeekCount}
           </div>
           <p className="mt-1 text-[11px] text-amber-800">
-            Kegiatan prioritas minggu berjalan (7 hari ke depan).
+            {lang === 'EN'
+              ? 'Priority activities for the current week (next 7 days).'
+              : 'Kegiatan prioritas minggu berjalan (7 hari ke depan).'}
           </p>
         </div>
 
         <div className="rounded-xl border border-red-200 bg-red-50/60 p-5">
           <div className="flex items-center justify-between text-xs font-semibold text-red-900">
-            <span>Kegiatan Terlambat / Lewat Tenggat</span>
+            <span>{lang === 'EN' ? 'Overdue Activities' : 'Kegiatan Terlambat / Lewat Tenggat'}</span>
             <AlertTriangle className="h-4 w-4 text-red-700" />
           </div>
           <div className="mt-2 text-3xl font-bold font-mono tabular-nums text-red-950">
             {stats.overdueCount}
           </div>
           <p className="mt-1 text-[11px] text-red-800">
-            Agenda lewat tenggat namun belum berstatus selesai.
+            {lang === 'EN'
+              ? 'Agendas exceeding deadline and not yet marked as completed.'
+              : 'Agenda lewat tenggat namun belum berstatus selesai.'}
           </p>
         </div>
       </div>
@@ -243,23 +256,37 @@ export const AuditCalendarSection: React.FC<AuditCalendarSectionProps> = ({
       <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs">
         <div className="border-b border-slate-200 bg-slate-900 px-6 py-4 text-white flex items-center justify-between">
           <div>
-            <h4 className="text-sm font-semibold">Daftar Agenda &amp; Timeline Siklus AMI</h4>
-            <p className="text-xs text-slate-300 mt-0.5">Siklus PPEPP Universitas Pattimura</p>
+            <h4 className="text-sm font-semibold">
+              {lang === 'EN' ? 'AMI Cycle Agendas & Timeline' : 'Daftar Agenda & Timeline Siklus AMI'}
+            </h4>
+            <p className="text-xs text-slate-300 mt-0.5">
+              {lang === 'EN' ? 'Pattimura University PPEPP Cycle' : 'Siklus PPEPP Universitas Pattimura'}
+            </p>
           </div>
-          <span className="text-xs font-mono text-amber-400">{events.length} Agenda Terdaftar</span>
+          <span className="text-xs font-mono text-amber-400">
+            {events.length} {lang === 'EN' ? 'Registered Agendas' : 'Agenda Terdaftar'}
+          </span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] border-collapse text-left text-xs">
             <thead className="bg-slate-100 text-slate-700 border-b border-slate-200">
               <tr>
-                <th className="px-4 py-3 font-semibold">Tahap &amp; Nama Kegiatan</th>
-                <th className="px-3 py-3 font-semibold">Tanggal Mulai</th>
-                <th className="px-3 py-3 font-semibold">Tanggal Tenggat</th>
-                <th className="px-3 py-3 font-semibold">Unit / Sasaran Prodi</th>
+                <th className="px-4 py-3 font-semibold">
+                  {lang === 'EN' ? 'Stage & Activity Name' : 'Tahap & Nama Kegiatan'}
+                </th>
+                <th className="px-3 py-3 font-semibold">
+                  {lang === 'EN' ? 'Start Date' : 'Tanggal Mulai'}
+                </th>
+                <th className="px-3 py-3 font-semibold">
+                  {lang === 'EN' ? 'Deadline' : 'Tanggal Tenggat'}
+                </th>
+                <th className="px-3 py-3 font-semibold">
+                  {lang === 'EN' ? 'Target Unit / Program' : 'Unit / Sasaran Prodi'}
+                </th>
                 <th className="px-3 py-3 font-semibold">Status</th>
-                <th className="px-4 py-3 font-semibold">Keterangan</th>
-                {isAdmin && <th className="px-3 py-3 font-semibold text-center">Aksi</th>}
+                <th className="px-4 py-3 font-semibold">{lang === 'EN' ? 'Description' : 'Keterangan'}</th>
+                {isAdmin && <th className="px-3 py-3 font-semibold text-center">{lang === 'EN' ? 'Actions' : 'Aksi'}</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
@@ -273,6 +300,12 @@ export const AuditCalendarSection: React.FC<AuditCalendarSectionProps> = ({
                     : isOverdue || ev.status === 'Terlambat'
                     ? 'bg-red-50 text-red-900 border-red-300'
                     : 'bg-blue-50 text-blue-900 border-blue-200';
+
+                const displayStatus = isOverdue
+                  ? (lang === 'EN' ? 'Overdue' : 'Terlambat')
+                  : lang === 'EN'
+                  ? (ev.status === 'Selesai' ? 'Completed' : ev.status === 'Minggu Ini' ? 'This Week' : ev.status === 'Terlambat' ? 'Overdue' : 'Upcoming')
+                  : ev.status;
 
                 return (
                   <tr key={ev.id} className="hover:bg-slate-50 transition-colors">
@@ -288,7 +321,7 @@ export const AuditCalendarSection: React.FC<AuditCalendarSectionProps> = ({
                     <td className="px-3 py-3">
                       <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-bold ${statusBadgeClass}`}>
                         {ev.status === 'Selesai' && <CheckCircle2 className="h-3 w-3 text-emerald-600" />}
-                        {isOverdue ? 'Terlambat' : ev.status}
+                        {displayStatus}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-slate-600 max-w-xs truncate" title={ev.keterangan}>

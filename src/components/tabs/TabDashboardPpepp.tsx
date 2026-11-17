@@ -53,6 +53,7 @@ import {
   rankProgramsForCycle,
 } from '../../utils/ppeppRanking';
 import { AuditCalendarSection } from './AuditCalendarSection';
+import { Language, translateStandardName, translateProgramName, translateFaculty } from '../../utils/i18n';
 
 interface TabDashboardPpeppProps {
   program: StudyProgramIdentity;
@@ -75,6 +76,7 @@ interface TabDashboardPpeppProps {
   canExport?: boolean;
   showToast?: (msg: string) => void;
   userRbacRole?: string;
+  lang?: Language;
 }
 
 export const TabDashboardPpepp: React.FC<TabDashboardPpeppProps> = ({
@@ -98,6 +100,7 @@ export const TabDashboardPpepp: React.FC<TabDashboardPpeppProps> = ({
   canExport = false,
   showToast,
   userRbacRole,
+  lang = 'ID',
 }) => {
   const canOpenTab = (tab: AmiTabId) => !allowedTabs || allowedTabs.includes(tab);
   const [trendRange, setTrendRange] = useState<'active_to_past' | 'all_cycles'>(
@@ -288,21 +291,22 @@ export const TabDashboardPpepp: React.FC<TabDashboardPpeppProps> = ({
 
   // Monthly Audit Summary Data across 12 months for active cycle
   const monthlyAuditData = useMemo(() => {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
+    const months = lang === 'EN'
+      ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      : ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
     const baseCap = overall.rataRataCapaianTerbobot;
+    const scoreKey = lang === 'EN' ? 'Quality Score' : 'Capaian Mutu';
+    const targetKey = lang === 'EN' ? 'Quality Target' : 'Target Mutu';
     return months.map((m, idx) => {
       const factor = 0.7 + (idx / 11) * 0.3;
       const progressScore = Math.min(100, Number((baseCap * factor).toFixed(1)));
       return {
         month: m,
-        'Capaian Mutu': progressScore,
-        'Target Mutu': overall.rataRataTargetTerbobot,
+        [scoreKey]: progressScore,
+        [targetKey]: overall.rataRataTargetTerbobot,
       };
     });
-  }, [overall]);
+  }, [overall, lang]);
 
   // Standards sorted by largest gap (Target - Capaian)
   const standardGapList = useMemo(() => {
@@ -999,15 +1003,19 @@ export const TabDashboardPpepp: React.FC<TabDashboardPpeppProps> = ({
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-emerald-700" />
               <h3 className="text-sm font-bold text-slate-900">
-                Ringkasan Audit Bulanan (Tren Perkembangan Skor Capaian &amp; Target Selama Siklus Berjalan)
+                {lang === 'EN'
+                  ? 'Monthly Audit Summary (Quality Score & Target Trend During Active Cycle)'
+                  : 'Ringkasan Audit Bulanan (Tren Perkembangan Skor Capaian & Target Selama Siklus Berjalan)'}
               </h3>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Pemantauan bulanan real-time dari Januari hingga Desember pada siklus {activeCycle.tahun_siklus}.
+              {lang === 'EN'
+                ? `Real-time monthly monitoring from January to December in cycle ${activeCycle.tahun_siklus}.`
+                : `Pemantauan bulanan real-time dari Januari hingga Desember pada siklus ${activeCycle.tahun_siklus}.`}
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs font-mono text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg">
-            <span>Siklus: {activeCycle.tahun_siklus}</span>
+            <span>{lang === 'EN' ? 'Cycle:' : 'Siklus:'} {activeCycle.tahun_siklus}</span>
           </div>
         </div>
 
@@ -1030,14 +1038,14 @@ export const TabDashboardPpepp: React.FC<TabDashboardPpeppProps> = ({
               <Legend wrapperStyle={{ fontSize: '12px' }} />
               <Line
                 type="monotone"
-                dataKey="Capaian Mutu"
+                dataKey={lang === 'EN' ? 'Quality Score' : 'Capaian Mutu'}
                 stroke="#1e3a8a"
                 strokeWidth={2.5}
                 dot={{ r: 4 }}
               />
               <Line
                 type="monotone"
-                dataKey="Target Mutu"
+                dataKey={lang === 'EN' ? 'Quality Target' : 'Target Mutu'}
                 stroke="#d97706"
                 strokeWidth={2}
                 strokeDasharray="4 4"
@@ -1727,6 +1735,7 @@ export const TabDashboardPpepp: React.FC<TabDashboardPpeppProps> = ({
       <AuditCalendarSection
         isAdmin={userRbacRole === 'admin'}
         showToast={showToast ?? (() => {})}
+        lang={lang}
       />
     </div>
   );

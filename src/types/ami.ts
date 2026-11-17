@@ -131,6 +131,8 @@ export interface AmiEvaluation {
   waktu_ptk: string;
   waktu_monev: string;
   bukti_link: string;
+  bukti_file_name?: string;
+  bukti_file_data?: string;
   bukti_realisasi: string;
   tanggal_penyelesaian: string;
   monev_status: MonevStatus;

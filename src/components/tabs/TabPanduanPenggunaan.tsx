@@ -30,11 +30,11 @@ const GUIDE_SECTIONS: GuideSection[] = [
   {
     id: 'awal',
     badge: 'Mulai Cepat',
-    title: '0.1 Login Akun Resmi, Hak Akses RBAC & Sinkronisasi Real-Time Cloud',
+    title: '0.1 Login Akun Resmi, Hak Akses Pengguna & Sinkronisasi Real-Time Cloud',
     summary:
-      'Aplikasi PPEPP UNPATTI terhubung penuh secara real-time dengan database Cloud (Supabase). Seluruh data Program Studi, Indikator, dan isian Evaluasi dimulai dari data aktual database (kosong apabila belum diisi) tanpa data dummy atau penyimpanan lokal browser.',
+      'Aplikasi PPEPP UNPATTI terhubung penuh secara real-time dengan penyimpanan Cloud terpusat. Seluruh data Program Studi, Indikator, dan isian Evaluasi dimulai dari data aktual institusi (kosong apabila belum diisi) tanpa data dummy atau penyimpanan lokal browser.',
     steps: [
-      'Masuk pada halaman Login resmi PPEPP UNPATTI menggunakan Email dan Password akun institusional Anda. Setelah autentikasi berhasil, sistem otomatis membaca peran dan cakupan unit Anda dari profil pengguna (sso_user_profiles).',
+      'Masuk pada halaman Login resmi PPEPP UNPATTI menggunakan Email dan Password akun institusional Anda. Setelah autentikasi berhasil, sistem otomatis membaca peran dan cakupan unit Anda dari profil pengguna.',
       'Periksa nama, NIP/jabatan, serta lencana peran aktif Anda di bagian kiri atas Sidebar dan Header atas (Super Admin, Admin LPMPP, Kaprodi, Auditor AMI, Dekanat, Rektorat, Lembaga, Pusat, Asesor LAM, atau Asesor BAN-PT).',
       'Pada Bilah Toolbar Atas, pilih filter "Fakultas", "Jenis Prodi" (Kependidikan 109 Indikator / Non-Kependidikan 127 Indikator), "Prodi", dan "Siklus" (2020/2021 s.d. 2030/2031). Bagi peran Kaprodi, filter Fakultas, Jenis Prodi, dan Prodi otomatis terkunci ke unit program studinya.',
       'Setiap pengisian nilai, target, analisis, maupun bukti tautan otomatis tersimpan ke Cloud dengan indikator status di Header atas ("Menyimpan..." lalu "Tersimpan di Cloud ✓") dan langsung tersinkron secara real-time.',
@@ -367,18 +367,18 @@ const GUIDE_SECTIONS: GuideSection[] = [
     title: '11. Manajemen Pengguna & Sistem',
     targetTab: 'manajemen',
     summary:
-      'Modul administrasi khusus Super Admin, Admin LPMPP, dan Lembaga untuk mengelola akun & peran pengguna pada tabel sso_user_profiles Supabase, mengatur status siklus PPEPP, dan mendaftarkan Program Studi baru.',
+      'Modul administrasi khusus Super Admin, Admin LPMPP, dan Lembaga untuk mengelola akun & wewenang pengguna terverifikasi, mengatur status siklus PPEPP, dan mendaftarkan Program Studi baru.',
     steps: [
-      'Pada bagian Manajemen Pengguna (sso_user_profiles), cari nama/email/NIP pengguna dan klik "Edit Profil & Peran" untuk mengatur Role (SUPER_ADMIN, ADMIN_LPMPP, KAPRODI, AUDITOR_AMI, DEKANAT, REKTORAT, LEMBAGA, PUSAT, ASESOR_LAM, ASESOR_BANPT) serta penautan unit_kode (kode prodi atau nama fakultas).',
-      'Klik "Segarkan" untuk menarik daftar akun terbaru dari Supabase sso_user_profiles.',
-      'Pada bagian Manajemen Siklus & Prodi, ubah status siklus PPEPP (Aktif, Selesai, Ditutup) atau klik "+ Tambah Prodi Baru" untuk menambahkan program studi ke ppepp_prodi.',
+      'Pada bagian Manajemen Pengguna Terpadu, cari nama/email/NIP pengguna dan klik "Edit Profil & Peran" untuk mengatur Role (SUPER_ADMIN, ADMIN_LPMPP, KAPRODI, AUDITOR_AMI, DEKANAT, REKTORAT, LEMBAGA, PUSAT, ASESOR_LAM, ASESOR_BANPT) serta penautan unit_kode (kode prodi atau nama fakultas).',
+      'Klik "Segarkan" untuk menarik daftar akun pengguna terbaru dari basis data pusat.',
+      'Pada bagian Manajemen Siklus & Prodi, ubah status siklus PPEPP (Aktif, Selesai, Ditutup) atau klik "+ Tambah Prodi Baru" untuk menambahkan program studi baru.',
     ],
     buttons: [
       {
-        name: 'Edit Profil & Peran (sso_user_profiles)',
+        name: 'Edit Profil & Peran Pengguna',
         role: 'Super Admin & Admin LPMPP',
         action:
-          'Memperbarui nama, NIP, jabatan, peran RBAC, dan unit_kode pengguna langsung ke Supabase.',
+          'Memperbarui nama, NIP, jabatan, hak akses peran, dan unit kerja pengguna ke server pusat.',
       },
       {
         name: 'Status Siklus & + Tambah Prodi Baru',
@@ -430,7 +430,7 @@ export const TabPanduanPenggunaan: React.FC<TabPanduanPenggunaanProps> = ({
                 Panduan Lengkap Penggunaan PPEPP UNPATTI
               </h2>
               <p className="mt-1 text-sm text-slate-600 max-w-3xl">
-                Alur operasional lengkap mulai dari Login akun resmi & RBAC, sinkronisasi real-time Cloud Supabase, pengisian Modul 00 s.d. 11, perengkingan & klasterisasi mutu, hingga ekspor laporan Word, PDF, dan Excel.
+                Alur operasional lengkap mulai dari login akun resmi, sinkronisasi real-time Cloud, pengisian Modul 00 s.d. 11, perengkingan & klasterisasi mutu, hingga ekspor laporan Word, PDF, dan Excel.
               </p>
             </div>
           </div>
@@ -452,19 +452,19 @@ export const TabPanduanPenggunaan: React.FC<TabPanduanPenggunaanProps> = ({
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3.5">
             <div className="flex items-center gap-1.5 font-semibold text-blue-900">
               <ShieldCheck className="h-4 w-4" />
-              Autentikasi & Multi-Peran RBAC
+              Autentikasi & Multi-Peran Terstandarisasi
             </div>
             <p className="mt-1 text-slate-600 leading-relaxed">
-              Login email/password terintegrasi tabel <strong>sso_user_profiles</strong>. Kaprodi otomatis terkunci ke prodinya, Auditor menilai & memverifikasi Monev, Dekanat menyetujui PTK, dan Admin mengelola seluruh sistem.
+              Login email/password terintegrasi akun institusional resmi. Kaprodi otomatis terkunci ke prodinya, Auditor menilai & memverifikasi Monev, Dekanat menyetujui PTK, dan Admin mengelola seluruh sistem.
             </p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3.5">
             <div className="flex items-center gap-1.5 font-semibold text-slate-900">
               <Cloud className="h-4 w-4 text-emerald-600" />
-              Database Real-Time Cloud (Supabase)
+              Penyimpanan Real-Time Terpusat
             </div>
             <p className="mt-1 text-slate-600 leading-relaxed">
-              Master Prodi (<strong>ppepp_prodi</strong>), Indikator (<strong>ppepp_indikator</strong>), dan isian Evaluasi (<strong>ppepp_evaluasi</strong>) tersimpan otomatis secara real-time. Indikator yang belum diisi dimulai dari kondisi kosong.
+              Master Prodi, Indikator, dan isian Evaluasi tersimpan otomatis secara real-time. Indikator yang belum diisi dimulai dari kondisi kosong siap pakai.
             </p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3.5 flex flex-col justify-between">

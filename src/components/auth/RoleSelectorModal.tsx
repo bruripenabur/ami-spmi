@@ -26,7 +26,7 @@ export const RoleSelectorModal: React.FC<RoleSelectorModalProps> = ({
             />
             <div className="min-w-0">
               <div className="text-[11px] font-bold uppercase tracking-wider text-amber-400">
-                Akun Multi-Peran (Multi-Role RBAC)
+                Akun Multi-Peran (Multi-Role)
               </div>
               <h1 className="text-base sm:text-lg font-bold text-white truncate">
                 Pilih Peran Aktif untuk Sesi Kerja

@@ -30,6 +30,14 @@ import {
 } from '../../utils/amiCalculations';
 import { IndicatorFormModal } from '../modals/IndicatorFormModal';
 import { ConfirmDeleteModal } from '../modals/ConfirmDeleteModal';
+import {
+  Language,
+  translateStandardName,
+  translateKategori,
+  translateIndicatorUraian,
+  translateRubricText,
+  translateSebutan,
+} from '../../utils/i18n';
 
 interface TabInstrumenEvaluasiProps {
   standards: AmiStandard[];
@@ -59,6 +67,7 @@ interface TabInstrumenEvaluasiProps {
   onUpdateIndicator: (indicator: AmiIndicator) => void;
   onDeleteIndicator: (indicatorId: string) => void;
   canExport?: boolean;
+  lang?: Language;
 }
 
 const SCORE_LEVELS: RubricLevelKey[] = [1, 2, 3, 4, 5, 6, 7];
@@ -95,6 +104,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
   onUpdateIndicator,
   onDeleteIndicator,
   canExport = false,
+  lang = 'ID',
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [kategoriFilter, setKategoriFilter] = useState<string>('all');
@@ -154,8 +164,12 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-base font-bold text-slate-900">
                 {isKaprodi
-                  ? `Instrumen Evaluasi Diri Program Studi (${visibleStandards.length} Standar SPMI)`
-                  : `Instrumen Evaluasi Diri & Penilaian Auditor (${visibleStandards.length} Standar SPMI)`}
+                  ? (lang === 'EN'
+                      ? `Study Program Self-Evaluation Instrument (${visibleStandards.length} SPMI Standards)`
+                      : `Instrumen Evaluasi Diri Program Studi (${visibleStandards.length} Standar SPMI)`)
+                  : (lang === 'EN'
+                      ? `Self-Evaluation & Auditor Assessment Instrument (${visibleStandards.length} SPMI Standards)`
+                      : `Instrumen Evaluasi Diri & Penilaian Auditor (${visibleStandards.length} Standar SPMI)`)}
               </h2>
               <span
                 className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-semibold ${
@@ -164,23 +178,33 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                     : 'border-slate-300 bg-slate-100 text-slate-700'
                 }`}
               >
-                Instrumen {jenisProdi} ({indicators.length} Indikator)
+                {lang === 'EN'
+                  ? `${jenisProdi === 'Kependidikan' ? 'Educational' : 'Non-Educational'} Instrument (${indicators.length} Indicators)`
+                  : `Instrumen ${jenisProdi} (${indicators.length} Indikator)`}
               </span>
               {isKaprodi && (
                 <span className="inline-flex items-center rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-900">
-                  Tampilan Kaprodi (6 Kolom Mutu)
+                  {lang === 'EN' ? 'Study Program Head View (6 Columns)' : 'Tampilan Kaprodi (6 Kolom Mutu)'}
                 </span>
               )}
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               {roleSummaryNote ||
                 (isKaprodi
-                  ? 'Hak Akses Kaprodi (Auditee) aktif: Isi opsi keadaan prodi saat ini (rubrik 1–7), nilai capaian, target 1 tahun yad, dan unggah tautan bukti dokumen.'
+                  ? (lang === 'EN'
+                      ? 'Study Program Head (Auditee) access active: Select current condition (rubric 1-7), achievement score, target in 1 year, and upload document evidence.'
+                      : 'Hak Akses Kaprodi (Auditee) aktif: Isi opsi keadaan prodi saat ini (rubrik 1–7), nilai capaian, target 1 tahun yad, dan unggah tautan bukti dokumen.')
                   : isAuditor
-                  ? 'Hak Akses Penilaian aktif: skor capaian, opsi keadaan prodi saat ini, analisis PLOR+CA, dan jadwal PTK dapat diisi.'
+                  ? (lang === 'EN'
+                      ? 'Auditor Evaluation active: score, rubric condition, PLOR+CA root cause, and CAR schedule can be filled.'
+                      : 'Hak Akses Penilaian aktif: skor capaian, opsi keadaan prodi saat ini, analisis PLOR+CA, dan jadwal PTK dapat diisi.')
                   : allowEvidence
-                  ? 'Hak Akses Prodi aktif: unggah tautan bukti dokumen, target 1 tahun, dan rencana PTK/RTL.'
-                  : 'Mode Inspeksi / Monitoring aktif: peninjauan capaian standar & kelengkapan dokumen bukti.')}
+                  ? (lang === 'EN'
+                      ? 'Study Program access active: upload evidence link/file, target in 1 year, and CAR action plan.'
+                      : 'Hak Akses Prodi aktif: unggah tautan bukti dokumen, target 1 tahun, dan rencana PTK/RTL.')
+                  : (lang === 'EN'
+                      ? 'Inspection / Monitoring mode active: reviewing standards achievement and documentary evidence.'
+                      : 'Mode Inspeksi / Monitoring aktif: peninjauan capaian standar & kelengkapan dokumen bukti.'))}
             </p>
           </div>
 
@@ -194,7 +218,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                 className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-bold text-slate-950 hover:bg-amber-400 transition-colors whitespace-nowrap"
               >
                 <Plus className="h-3.5 w-3.5" />
-                Tambah Indikator
+                {lang === 'EN' ? 'Add Indicator' : 'Tambah Indikator'}
               </button>
             )}
             {(userRbacRole === 'admin' || canExport) && (
@@ -204,7 +228,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                 className="inline-flex items-center gap-1.5 rounded-lg border border-blue-900 bg-blue-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-950 transition-colors whitespace-nowrap"
               >
                 <Download className="h-3.5 w-3.5 text-amber-400" />
-                Unduh Template Instrumen (.xlsx)
+                {lang === 'EN' ? 'Download Instrument Template (.xlsx)' : 'Unduh Template Instrumen (.xlsx)'}
               </button>
             )}
             <div className="relative">
@@ -213,7 +237,11 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={isKaprodi ? "Cari indikator, uraian..." : "Cari indikator, uraian, PTK..."}
+                placeholder={
+                  lang === 'EN'
+                    ? 'Search indicator, description...'
+                    : (isKaprodi ? 'Cari indikator, uraian...' : 'Cari indikator, uraian, PTK...')
+                }
                 className="w-56 rounded-lg border border-slate-300 bg-white pl-8 pr-3 py-1.5 text-xs text-slate-900 focus:border-blue-800 focus:outline-none"
               />
             </div>
@@ -225,11 +253,11 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                   onChange={(e) => setKategoriFilter(e.target.value)}
                   className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-blue-800 focus:outline-none"
                 >
-                  <option value="all">Semua Kategori</option>
-                  <option value="Mayor">Mayor</option>
-                  <option value="Minor">Minor</option>
-                  <option value="Observasi">Observasi</option>
-                  <option value="Sesuai (Baik)">Sesuai (Baik)</option>
+                  <option value="all">{lang === 'EN' ? 'All Categories' : 'Semua Kategori'}</option>
+                  <option value="Mayor">{translateKategori('Mayor', lang)}</option>
+                  <option value="Minor">{translateKategori('Minor', lang)}</option>
+                  <option value="Observasi">{translateKategori('Observasi', lang)}</option>
+                  <option value="Sesuai (Baik)">{translateKategori('Sesuai (Baik)', lang)}</option>
                   <option value="Best Practice">Best Practice</option>
                 </select>
               </div>
@@ -248,7 +276,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
-            Semua Standar ({visibleStandards.length})
+            {lang === 'EN' ? `All Standards (${visibleStandards.length})` : `Semua Standar (${visibleStandards.length})`}
           </button>
           {visibleStandards.map((std) => (
             <button
@@ -261,7 +289,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              {std.id}. {std.nama.replace('Standar ', '')}
+              {std.id}. {translateStandardName(std.nama, lang).replace(/^(Standar|Standard)\s+/, '')}
             </button>
           ))}
         </div>
@@ -297,11 +325,11 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                   {standard.kode}
                 </span>
                 <h3 className="text-sm font-semibold">
-                  {standard.id}. {standard.nama.toUpperCase()}
+                  {standard.id}. {translateStandardName(standard.nama, lang).toUpperCase()}
                 </h3>
               </div>
               <span className="text-xs text-slate-300 font-mono tabular-nums">
-                {rows.length} Indikator
+                {rows.length} {lang === 'EN' ? 'Indicators' : 'Indikator'}
               </span>
             </div>
 
@@ -316,64 +344,66 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                     <tr>
                       <th className="px-3 py-2.5 font-semibold w-16">No</th>
                       <th className="px-3 py-2.5 font-semibold w-80">
-                        Uraian Indikator
+                        {lang === 'EN' ? 'Indicator Description' : 'Uraian Indikator'}
                       </th>
                       <th className="px-3 py-2.5 font-semibold w-96">
-                        Keadaan Prodi Saat Ini (Klik Rubrik 1–7)
+                        {lang === 'EN' ? 'Current State (Click Rubric 1–7)' : 'Keadaan Prodi Saat Ini (Klik Rubrik 1–7)'}
                       </th>
                       <th className="px-2.5 py-2.5 font-semibold text-center w-24">
-                        Nilai Capaian
+                        {lang === 'EN' ? 'Achievement' : 'Nilai Capaian'}
                       </th>
                       <th className="px-2.5 py-2.5 font-semibold text-center w-24">
-                        Target 1 Th yad
+                        {lang === 'EN' ? 'Target in 1 Yr' : 'Target 1 Th yad'}
                       </th>
                       <th className="px-3 py-2.5 font-semibold w-72">
-                        Bukti Link Dokumen (opsional)
+                        {lang === 'EN' ? 'Evidence Link / File' : 'Bukti Link Dokumen (opsional)'}
                       </th>
                     </tr>
                   ) : (
                     <tr>
                       <th className="px-3 py-2.5 font-semibold w-14">No</th>
                       <th className="px-3 py-2.5 font-semibold w-64">
-                        Uraian Indikator
+                        {lang === 'EN' ? 'Indicator Description' : 'Uraian Indikator'}
                       </th>
                       <th className="px-3 py-2.5 font-semibold w-72">
-                        Keadaan Prodi Saat Ini (Klik Rubrik 1–7)
+                        {lang === 'EN' ? 'Current State (Click Rubric 1–7)' : 'Keadaan Prodi Saat Ini (Klik Rubrik 1–7)'}
                       </th>
                       <th className="px-2.5 py-2.5 font-semibold text-center w-20">
-                        Nilai Capaian
+                        {lang === 'EN' ? 'Score' : 'Nilai Capaian'}
                       </th>
                       <th className="px-3 py-2.5 font-semibold w-36">
-                        Sebutan Capaian
+                        {lang === 'EN' ? 'Predicate' : 'Sebutan Capaian'}
                       </th>
                       <th className="px-2.5 py-2.5 font-semibold text-center w-20">
-                        Target 1 Th yad
+                        {lang === 'EN' ? 'Target 1 Yr' : 'Target 1 Th yad'}
                       </th>
                       <th className="px-3 py-2.5 font-semibold w-36">
-                        Sebutan Target
+                        {lang === 'EN' ? 'Target Predicate' : 'Sebutan Target'}
                       </th>
                       <th className="px-3 py-2.5 font-semibold w-32">
-                        Kategori Temuan
+                        {lang === 'EN' ? 'Findings' : 'Kategori Temuan'}
                       </th>
                       <th className="px-3 py-2.5 font-semibold w-56">
-                        Akar Masalah / Penunjang (PLOR+CA)
+                        {lang === 'EN' ? 'Root Cause (PLOR+CA)' : 'Akar Masalah / Penunjang (PLOR+CA)'}
                       </th>
                       <th className="px-3 py-2.5 font-semibold w-48">
-                        PTK / RTL
+                        {lang === 'EN' ? 'CAR / RTL Plan' : 'PTK / RTL'}
                       </th>
-                      <th className="px-3 py-2.5 font-semibold w-36">PIC</th>
-                      <th className="px-3 py-2.5 font-semibold w-32">
-                        Waktu Selesai PTK
+                      <th className="px-3 py-2.5 font-semibold w-36">
+                        {lang === 'EN' ? 'PIC' : 'PIC'}
                       </th>
                       <th className="px-3 py-2.5 font-semibold w-32">
-                        Waktu Monev
+                        {lang === 'EN' ? 'CAR Schedule' : 'Waktu Selesai PTK'}
+                      </th>
+                      <th className="px-3 py-2.5 font-semibold w-32">
+                        {lang === 'EN' ? 'Monev Schedule' : 'Waktu Monev'}
                       </th>
                       <th className="px-3 py-2.5 font-semibold w-44">
-                        Bukti Link Dokumen
+                        {lang === 'EN' ? 'Evidence Link / File' : 'Bukti Link Dokumen'}
                       </th>
                       {canCrudIndicators && (
                         <th className="px-3 py-2.5 font-semibold text-center w-24">
-                          Aksi
+                          {lang === 'EN' ? 'Actions' : 'Aksi'}
                         </th>
                       )}
                     </tr>
@@ -406,7 +436,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
 
                           {/* 2. Uraian Indikator */}
                           <td className="px-3 py-3 text-slate-800 leading-relaxed">
-                            {ind.uraian}
+                            {translateIndicatorUraian(ind.uraian, lang)}
                           </td>
 
                           {/* 3. Keadaan Prodi Saat Ini (Klik Rubrik 1–7) */}
@@ -424,10 +454,14 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                                 }
                                 className="w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-[11px] font-medium text-slate-800 focus:border-blue-800 focus:outline-none"
                               >
-                                <option value="">-- Pilih Kondisi Prodi Saat Ini (1-7) --</option>
+                                <option value="">
+                                  {lang === 'EN'
+                                    ? '-- Select Current Condition (1-7) --'
+                                    : '-- Pilih Kondisi Prodi Saat Ini (1-7) --'}
+                                </option>
                                 {SCORE_LEVELS.map((lvl) => (
                                   <option key={lvl} value={lvl}>
-                                    {lvl}. {ind.rubric_levels[lvl]}
+                                    {lvl}. {translateRubricText(ind.rubric_levels[lvl], lang, lvl)}
                                   </option>
                                 ))}
                               </select>
@@ -440,17 +474,19 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                                   <span className="inline-flex items-center gap-1">
                                     <BookOpen className="h-3 w-3" />
                                     {ev.nilai_capaian !== null
-                                      ? `Skor ${ev.nilai_capaian}`
-                                      : 'Belum Dinilai'}
+                                      ? (lang === 'EN' ? `Score ${ev.nilai_capaian}` : `Skor ${ev.nilai_capaian}`)
+                                      : (lang === 'EN' ? 'Not Scored' : 'Belum Dinilai')}
                                   </span>
                                   <span className="text-slate-400 group-hover:text-blue-700">
-                                    Lihat Rubrik →
+                                    {lang === 'EN' ? 'View Rubric →' : 'Lihat Rubrik →'}
                                   </span>
                                 </div>
                                 <p className="text-xs text-slate-700 leading-snug line-clamp-3">
                                   {ev.nilai_capaian !== null
-                                    ? ind.rubric_levels[ev.nilai_capaian]
-                                    : 'Belum ada isian nilai capaian. Klik untuk melihat deskripsi rubrik skala 1–7.'}
+                                    ? translateRubricText(ind.rubric_levels[ev.nilai_capaian], lang, ev.nilai_capaian)
+                                    : (lang === 'EN'
+                                        ? 'No score filled yet. Click to view rubric scale 1–7 description.'
+                                        : 'Belum ada isian nilai capaian. Klik untuk melihat deskripsi rubrik skala 1–7.')}
                                 </p>
                               </button>
                             </div>
@@ -507,7 +543,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                           </td>
 
                           {/* 6. Bukti Link Dokumen (opsional) */}
-                          <td className="px-3 py-3">
+                          <td className="px-3 py-3 space-y-1.5">
                             <div className="flex items-center gap-1">
                               <input
                                 type="url"
@@ -532,6 +568,55 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                                 </a>
                               )}
                             </div>
+                            <div className="flex items-center justify-between gap-1 text-[11px]">
+                              <label className="cursor-pointer inline-flex items-center gap-1 rounded bg-slate-100 hover:bg-slate-200 px-2 py-1 text-slate-700 font-medium">
+                                <span>{lang === 'EN' ? 'Upload File' : 'Unggah File'}</span>
+                                <input
+                                  type="file"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    const reader = new FileReader();
+                                    reader.onload = (uploadEvent) => {
+                                      const base64String = uploadEvent.target?.result as string;
+                                      onUpdateEvaluation(ind.id, {
+                                        bukti_file_name: file.name,
+                                        bukti_file_data: base64String,
+                                      });
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }}
+                                />
+                              </label>
+                              {ev.bukti_file_name && (
+                                <div className="flex items-center gap-1 truncate">
+                                  <a
+                                    href={ev.bukti_file_data || '#'}
+                                    download={ev.bukti_file_name}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-700 underline truncate max-w-[110px]"
+                                    title={ev.bukti_file_name}
+                                  >
+                                    {ev.bukti_file_name}
+                                  </a>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      onUpdateEvaluation(ind.id, {
+                                        bukti_file_name: undefined,
+                                        bukti_file_data: undefined,
+                                      })
+                                    }
+                                    className="text-red-600 hover:text-red-800 font-bold px-1"
+                                    title="Hapus file"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );
@@ -546,7 +631,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                           {ind.code}
                         </td>
                         <td className="px-3 py-3 text-slate-800 leading-relaxed">
-                          {ind.uraian}
+                          {translateIndicatorUraian(ind.uraian, lang)}
                         </td>
                         <td className="px-3 py-3">
                           <div className="space-y-1.5">
@@ -563,10 +648,12 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                                 }
                                 className="w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-[11px] font-medium text-slate-800 focus:border-blue-800 focus:outline-none"
                               >
-                                <option value="">-- Pilih Kondisi (1-7) --</option>
+                                <option value="">
+                                  {lang === 'EN' ? '-- Select Condition (1-7) --' : '-- Pilih Kondisi (1-7) --'}
+                                </option>
                                 {SCORE_LEVELS.map((lvl) => (
                                   <option key={lvl} value={lvl}>
-                                    {lvl}. {ind.rubric_levels[lvl]}
+                                    {lvl}. {translateRubricText(ind.rubric_levels[lvl], lang, lvl)}
                                   </option>
                                 ))}
                               </select>
@@ -580,17 +667,21 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                                 <span className="inline-flex items-center gap-1">
                                   <BookOpen className="h-3 w-3" />
                                   {ev.nilai_capaian !== null
-                                    ? `Skor ${ev.nilai_capaian}`
-                                    : 'Belum Dinilai'}
+                                    ? (lang === 'EN' ? `Score ${ev.nilai_capaian}` : `Skor ${ev.nilai_capaian}`)
+                                    : (lang === 'EN' ? 'Not Scored' : 'Belum Dinilai')}
                                 </span>
                                 <span className="text-slate-400 group-hover:text-blue-700">
-                                  {isAuditor ? 'Detail Rubrik →' : 'Lihat Rubrik →'}
+                                  {isAuditor
+                                    ? (lang === 'EN' ? 'Rubric Details →' : 'Detail Rubrik →')
+                                    : (lang === 'EN' ? 'View Rubric →' : 'Lihat Rubrik →')}
                                 </span>
                               </div>
                               <p className="text-xs text-slate-700 leading-snug line-clamp-3">
                                 {ev.nilai_capaian !== null
-                                  ? ind.rubric_levels[ev.nilai_capaian]
-                                  : 'Belum ada isian nilai capaian. Klik untuk melihat deskripsi rubrik skala 1–7.'}
+                                  ? translateRubricText(ind.rubric_levels[ev.nilai_capaian], lang, ev.nilai_capaian)
+                                  : (lang === 'EN'
+                                      ? 'No score filled yet. Click to view rubric scale 1–7 description.'
+                                      : 'Belum ada isian nilai capaian. Klik untuk melihat deskripsi rubrik skala 1–7.')}
                               </p>
                             </button>
                           </div>
@@ -620,7 +711,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                           </select>
                         </td>
                         <td className="px-3 py-3 text-slate-700 font-medium">
-                          {getSebutan(ev.nilai_capaian)}
+                          {translateSebutan(getSebutan(ev.nilai_capaian), lang)}
                         </td>
                         <td className="px-2.5 py-3 text-center">
                           <select
@@ -647,7 +738,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                           </select>
                         </td>
                         <td className="px-3 py-3 text-slate-700 font-medium">
-                          {getSebutan(ev.target_1_yr)}
+                          {translateSebutan(getSebutan(ev.target_1_yr), lang)}
                         </td>
                         <td className="px-3 py-3">
                           {isAuditor ? (
@@ -667,19 +758,20 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                                 )}`}
                               >
                                 <option value="">
-                                  {getKategoriTemuan(ev.nilai_capaian, ev.target_1_yr, null) ??
-                                    '-'}{' '}
+                                  {getKategoriTemuan(ev.nilai_capaian, ev.target_1_yr, null)
+                                    ? translateKategori(getKategoriTemuan(ev.nilai_capaian, ev.target_1_yr, null)!, lang)
+                                    : '-'}{' '}
                                   (Auto)
                                 </option>
                                 {KATEGORI_OPTIONS.map((opt) => (
                                   <option key={opt} value={opt}>
-                                    {opt}
+                                    {translateKategori(opt, lang)}
                                   </option>
                                 ))}
                               </select>
                               {ev.kategori_override && (
                                 <div className="text-[10px] text-slate-500">
-                                  Manual Auditor
+                                  {lang === 'EN' ? 'Auditor Override' : 'Manual Auditor'}
                                 </div>
                               )}
                             </div>
@@ -690,11 +782,11 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                                   kategori
                                 )}`}
                               >
-                                {kategori ?? '-'}
+                                {kategori ? translateKategori(kategori, lang) : '-'}
                               </span>
                               {ev.kategori_override && (
                                 <div className="mt-1 text-[10px] text-slate-500">
-                                  Manual Auditor
+                                  {lang === 'EN' ? 'Auditor Override' : 'Manual Auditor'}
                                 </div>
                               )}
                             </>
@@ -709,13 +801,17 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                             <div className="flex items-center justify-between text-[11px] font-semibold text-slate-700 mb-1">
                               <span className="inline-flex items-center gap-1">
                                 <ClipboardEdit className="h-3 w-3 text-blue-800" />
-                                {hasPlor ? 'PLOR+CA Terisi' : 'Isi PLOR+CA'}
+                                {hasPlor
+                                  ? (lang === 'EN' ? 'CAR+PLOR Filled' : 'PLOR+CA Terisi')
+                                  : (lang === 'EN' ? 'Fill CAR+PLOR' : 'Isi PLOR+CA')}
                               </span>
                             </div>
                             <p className="text-xs text-slate-600 line-clamp-2">
                               {ev.akar_masalah ||
                                 ev.plor_ca.problem ||
-                                'Klik untuk mencatat akar masalah / faktor penunjang...'}
+                                (lang === 'EN'
+                                  ? 'Click to record root causes / driving factors...'
+                                  : 'Klik untuk mencatat akar masalah / faktor penunjang...')}
                             </p>
                           </button>
                         </td>
@@ -729,7 +825,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                                 ptk_rtl: e.target.value,
                               })
                             }
-                            placeholder="Rencana PTK / RTL..."
+                            placeholder={lang === 'EN' ? 'CAR / RTL Action Plan...' : 'Rencana PTK / RTL...'}
                             className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-800 focus:border-blue-800 focus:outline-none disabled:bg-slate-100 disabled:text-slate-500"
                           />
                         </td>
@@ -741,7 +837,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                             onChange={(e) =>
                               onUpdateEvaluation(ind.id, { pic: e.target.value })
                             }
-                            placeholder="Penanggung jawab"
+                            placeholder={lang === 'EN' ? 'Person in charge' : 'Penanggung jawab'}
                             className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-800 focus:border-blue-800 focus:outline-none disabled:bg-slate-100 disabled:text-slate-500"
                           />
                         </td>
@@ -771,7 +867,7 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                             className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-xs font-mono text-slate-800 disabled:bg-slate-100 disabled:text-slate-500"
                           />
                         </td>
-                        <td className="px-3 py-3">
+                        <td className="px-3 py-3 space-y-1.5">
                           <div className="flex items-center gap-1">
                             <input
                               type="url"
@@ -795,6 +891,57 @@ export const TabInstrumenEvaluasi: React.FC<TabInstrumenEvaluasiProps> = ({
                               >
                                 <ExternalLink className="h-3.5 w-3.5" />
                               </a>
+                            )}
+                          </div>
+                          <div className="flex items-center justify-between gap-1 text-[11px]">
+                            <label className={`cursor-pointer inline-flex items-center gap-1 rounded bg-slate-100 hover:bg-slate-200 px-2 py-1 text-slate-700 font-medium ${!allowEvidence && !isAuditor ? 'opacity-50 pointer-events-none' : ''}`}>
+                              <span>{lang === 'EN' ? 'Upload File' : 'Unggah File'}</span>
+                              <input
+                                type="file"
+                                disabled={!allowEvidence && !isAuditor}
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  const reader = new FileReader();
+                                  reader.onload = (uploadEvent) => {
+                                    const base64String = uploadEvent.target?.result as string;
+                                    onUpdateEvaluation(ind.id, {
+                                      bukti_file_name: file.name,
+                                      bukti_file_data: base64String,
+                                    });
+                                  };
+                                  reader.readAsDataURL(file);
+                                }}
+                              />
+                            </label>
+                            {ev.bukti_file_name && (
+                              <div className="flex items-center gap-1 truncate">
+                                <a
+                                  href={ev.bukti_file_data || '#'}
+                                  download={ev.bukti_file_name}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-700 underline truncate max-w-[110px]"
+                                  title={ev.bukti_file_name}
+                                >
+                                  {ev.bukti_file_name}
+                                </a>
+                                <button
+                                  type="button"
+                                  disabled={!allowEvidence && !isAuditor}
+                                  onClick={() =>
+                                    onUpdateEvaluation(ind.id, {
+                                      bukti_file_name: undefined,
+                                      bukti_file_data: undefined,
+                                    })
+                                  }
+                                  className="text-red-600 hover:text-red-800 font-bold px-1"
+                                  title="Hapus file"
+                                >
+                                  ×
+                                </button>
+                              </div>
                             )}
                           </div>
                         </td>

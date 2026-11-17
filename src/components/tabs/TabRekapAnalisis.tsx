@@ -10,6 +10,7 @@ import {
   StudyProgramIdentity,
 } from '../../types/ami';
 import { getKategoriBadgeClasses, getKategoriTemuan, getSebutan } from '../../utils/amiCalculations';
+import { Language, translateStandardName, translateProgramName, translateKategori } from '../../utils/i18n';
 
 interface TabRekapAnalisisProps {
   program: StudyProgramIdentity;
@@ -21,6 +22,7 @@ interface TabRekapAnalisisProps {
   canInspectInstrumen?: boolean;
   onInspectStandard: (standardId: number) => void;
   onNavigateTab?: (tab: AmiTabId) => void;
+  lang?: Language;
 }
 
 export const TabRekapAnalisis: React.FC<TabRekapAnalisisProps> = ({
@@ -33,6 +35,7 @@ export const TabRekapAnalisis: React.FC<TabRekapAnalisisProps> = ({
   canInspectInstrumen = true,
   onInspectStandard,
   onNavigateTab,
+  lang = 'ID',
 }) => {
   const belowThresholdStandards = recaps.filter(
     (r) => r.evaluatedCount > 0 && r.nilaiCapaian < 60
@@ -78,10 +81,14 @@ export const TabRekapAnalisis: React.FC<TabRekapAnalisisProps> = ({
             <AlertCircle className="h-5 w-5 text-amber-700 shrink-0 mt-0.5" />
             <div>
               <div className="text-xs font-bold text-amber-900">
-                Peringatan Mutu: {belowThresholdStandards.length} Standar SPMI Berada di Bawah Ambang Batas Minimal (&lt; 60.00)
+                {lang === 'EN'
+                  ? `Quality Alert: ${belowThresholdStandards.length} SPMI Standards are Below the Minimum Threshold (< 60.00)`
+                  : `Peringatan Mutu: ${belowThresholdStandards.length} Standar SPMI Berada di Bawah Ambang Batas Minimal (< 60.00)`}
               </div>
               <p className="text-xs text-amber-800 mt-0.5">
-                Standar berikut memerlukan tindakan koreksi segera: {belowThresholdStandards.map((s) => `${s.standardId}. ${s.nama} (${s.nilaiCapaian.toFixed(2)})`).join(', ')}.
+                {lang === 'EN'
+                  ? `The following standards require immediate corrective action: ${belowThresholdStandards.map((s) => `${s.standardId}. ${translateStandardName(s.nama, lang)} (${s.nilaiCapaian.toFixed(2)})`).join(', ')}.`
+                  : `Standar berikut memerlukan tindakan koreksi segera: ${belowThresholdStandards.map((s) => `${s.standardId}. ${s.nama} (${s.nilaiCapaian.toFixed(2)})`).join(', ')}.`}
               </p>
             </div>
           </div>
@@ -92,7 +99,7 @@ export const TabRekapAnalisis: React.FC<TabRekapAnalisisProps> = ({
                 onClick={() => onNavigateTab('perengkingan')}
                 className="rounded-lg bg-amber-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-900"
               >
-                Lihat Perengkingan &amp; Klaster
+                {lang === 'EN' ? 'View Ranking & Clusters' : 'Lihat Perengkingan & Klaster'}
               </button>
             </div>
           )}
@@ -102,7 +109,9 @@ export const TabRekapAnalisis: React.FC<TabRekapAnalisisProps> = ({
       {/* Top Executive KPI Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <div className="text-xs text-slate-500">Nilai Terbobot Capaian</div>
+          <div className="text-xs text-slate-500">
+            {lang === 'EN' ? 'Weighted Achievement' : 'Nilai Terbobot Capaian'}
+          </div>
           <div className="mt-1 text-2xl font-bold font-mono tabular-nums text-slate-900">
             {overall.rataRataCapaianTerbobot.toFixed(2)}
           </div>
@@ -111,37 +120,47 @@ export const TabRekapAnalisis: React.FC<TabRekapAnalisisProps> = ({
           </div>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <div className="text-xs text-slate-500">Nilai Terbobot Target</div>
+          <div className="text-xs text-slate-500">
+            {lang === 'EN' ? 'Weighted Target' : 'Nilai Terbobot Target'}
+          </div>
           <div className="mt-1 text-2xl font-bold font-mono tabular-nums text-slate-900">
             {overall.rataRataTargetTerbobot.toFixed(2)}
           </div>
-          <div className="mt-0.5 text-xs text-slate-500">Skala Normalisasi 0–100</div>
+          <div className="mt-0.5 text-xs text-slate-500">
+            {lang === 'EN' ? 'Normalized Scale 0–100' : 'Skala Normalisasi 0–100'}
+          </div>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <div className="text-xs text-slate-500">Temuan KTS (Mayor / Minor)</div>
+          <div className="text-xs text-slate-500">
+            {lang === 'EN' ? 'Findings (Major / Minor)' : 'Temuan KTS (Mayor / Minor)'}
+          </div>
           <div className="mt-1 text-2xl font-bold font-mono tabular-nums text-red-700">
             {overall.totalCounts.Mayor} / {overall.totalCounts.Minor}
           </div>
           <div className="mt-0.5 text-xs text-slate-500">
-            Wajib Tindakan Koreksi (PTK)
+            {lang === 'EN' ? 'Corrective Action Required (CAR)' : 'Wajib Tindakan Koreksi (PTK)'}
           </div>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <div className="text-xs text-slate-500">Observasi &amp; Saran Perbaikan</div>
+          <div className="text-xs text-slate-500">
+            {lang === 'EN' ? 'Observations & Suggestions' : 'Observasi & Saran Perbaikan'}
+          </div>
           <div className="mt-1 text-2xl font-bold font-mono tabular-nums text-amber-700">
             {overall.totalCounts.Observasi}
           </div>
           <div className="mt-0.5 text-xs text-slate-500">
-            Potensi peningkatan mutu
+            {lang === 'EN' ? 'Quality Improvement Potential' : 'Potensi peningkatan mutu'}
           </div>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <div className="text-xs text-slate-500">Sesuai &amp; Best Practice</div>
+          <div className="text-xs text-slate-500">
+            {lang === 'EN' ? 'Achieved & Best Practice' : 'Sesuai & Best Practice'}
+          </div>
           <div className="mt-1 text-2xl font-bold font-mono tabular-nums text-emerald-700">
             {overall.totalCounts['Sesuai (Baik)'] + overall.totalCounts['Best Practice']}
           </div>
           <div className="mt-0.5 text-xs text-slate-500 font-mono tabular-nums">
-            {overall.totalCounts['Best Practice']} Best Practice · {overall.totalIndikator} Total Butir
+            {overall.totalCounts['Best Practice']} Best Practice · {overall.totalIndikator} {lang === 'EN' ? 'Total Items' : 'Total Butir'}
           </div>
         </div>
       </div>
@@ -154,28 +173,30 @@ export const TabRekapAnalisis: React.FC<TabRekapAnalisisProps> = ({
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-emerald-700" />
               <h3 className="text-sm font-bold text-emerald-950">
-                Top 5 Indikator Capaian Tertinggi (Kinerja Unggul)
+                {lang === 'EN'
+                  ? 'Top 5 Highest Performing Indicators (Superior Performance)'
+                  : 'Top 5 Indikator Capaian Tertinggi (Kinerja Unggul)'}
               </h3>
             </div>
             <span className="rounded bg-emerald-200 px-2 py-0.5 font-mono text-[11px] font-semibold text-emerald-900">
-              Skor 6 &amp; 7
+              {lang === 'EN' ? 'Scores 6 & 7' : 'Skor 6 & 7'}
             </span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-xs">
               <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-2.5 font-semibold">Indikator</th>
-                  <th className="px-3 py-2.5 font-semibold">Standar SPMI</th>
-                  <th className="px-3 py-2.5 font-semibold text-right">Skor</th>
-                  <th className="px-3 py-2.5 font-semibold text-right">Aksi</th>
+                  <th className="px-4 py-2.5 font-semibold">{lang === 'EN' ? 'Indicator' : 'Indikator'}</th>
+                  <th className="px-3 py-2.5 font-semibold">{lang === 'EN' ? 'SPMI Standard' : 'Standar SPMI'}</th>
+                  <th className="px-3 py-2.5 font-semibold text-right">{lang === 'EN' ? 'Score' : 'Skor'}</th>
+                  <th className="px-3 py-2.5 font-semibold text-right">{lang === 'EN' ? 'Action' : 'Aksi'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
                 {topHighest.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="px-4 py-6 text-center text-slate-500">
-                      Belum ada indikator yang dievaluasi dengan skor capaian.
+                      {lang === 'EN' ? 'No indicators evaluated yet.' : 'Belum ada indikator yang dievaluasi dengan skor capaian.'}
                     </td>
                   </tr>
                 ) : (
@@ -190,7 +211,7 @@ export const TabRekapAnalisis: React.FC<TabRekapAnalisisProps> = ({
                         </div>
                       </td>
                       <td className="px-3 py-2.5 text-slate-700 text-[11px]">
-                        {item.standard ? `${item.standard.id}. ${item.standard.nama}` : '-'}
+                        {item.standard ? `${item.standard.id}. ${translateStandardName(item.standard.nama, lang)}` : '-'}
                       </td>
                       <td className="px-3 py-2.5 text-right">
                         <span className="inline-block rounded bg-emerald-100 px-2 py-0.5 font-mono font-bold text-emerald-900">
@@ -204,7 +225,7 @@ export const TabRekapAnalisis: React.FC<TabRekapAnalisisProps> = ({
                             onClick={() => onInspectStandard(item.standard!.id)}
                             className="inline-flex items-center gap-1 text-xs font-semibold text-blue-800 hover:text-blue-950"
                           >
-                            Audit
+                            {lang === 'EN' ? 'Audit' : 'Audit'}
                             <ArrowRight className="h-3 w-3" />
                           </button>
                         ) : (
@@ -225,28 +246,30 @@ export const TabRekapAnalisis: React.FC<TabRekapAnalisisProps> = ({
             <div className="flex items-center gap-2">
               <TrendingDown className="h-4 w-4 text-red-700" />
               <h3 className="text-sm font-bold text-red-950">
-                Top 5 Indikator Capaian Terendah (Prioritas Intervensi KTS)
+                {lang === 'EN'
+                  ? 'Top 5 Lowest Performing Indicators (Priority Action)'
+                  : 'Top 5 Indikator Capaian Terendah (Prioritas Intervensi KTS)'}
               </h3>
             </div>
             <span className="rounded bg-red-200 px-2 py-0.5 font-mono text-[11px] font-semibold text-red-900">
-              Skor 1 &amp; 2
+              {lang === 'EN' ? 'Scores 1 & 2' : 'Skor 1 & 2'}
             </span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-xs">
               <thead className="bg-slate-50 text-slate-700 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-2.5 font-semibold">Indikator</th>
-                  <th className="px-3 py-2.5 font-semibold">Standar SPMI</th>
-                  <th className="px-3 py-2.5 font-semibold text-right">Skor</th>
-                  <th className="px-3 py-2.5 font-semibold text-right">Aksi</th>
+                  <th className="px-4 py-2.5 font-semibold">{lang === 'EN' ? 'Indicator' : 'Indikator'}</th>
+                  <th className="px-3 py-2.5 font-semibold">{lang === 'EN' ? 'SPMI Standard' : 'Standar SPMI'}</th>
+                  <th className="px-3 py-2.5 font-semibold text-right">{lang === 'EN' ? 'Score' : 'Skor'}</th>
+                  <th className="px-3 py-2.5 font-semibold text-right">{lang === 'EN' ? 'Action' : 'Aksi'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
                 {topLowest.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="px-4 py-6 text-center text-slate-500">
-                      Belum ada indikator yang dievaluasi dengan skor capaian.
+                      {lang === 'EN' ? 'No indicators evaluated yet.' : 'Belum ada indikator yang dievaluasi dengan skor capaian.'}
                     </td>
                   </tr>
                 ) : (
@@ -261,7 +284,7 @@ export const TabRekapAnalisis: React.FC<TabRekapAnalisisProps> = ({
                         </div>
                       </td>
                       <td className="px-3 py-2.5 text-slate-700 text-[11px]">
-                        {item.standard ? `${item.standard.id}. ${item.standard.nama}` : '-'}
+                        {item.standard ? `${item.standard.id}. ${translateStandardName(item.standard.nama, lang)}` : '-'}
                       </td>
                       <td className="px-3 py-2.5 text-right">
                         <span className="inline-block rounded bg-red-100 px-2 py-0.5 font-mono font-bold text-red-950">
@@ -275,7 +298,7 @@ export const TabRekapAnalisis: React.FC<TabRekapAnalisisProps> = ({
                             onClick={() => onInspectStandard(item.standard!.id)}
                             className="inline-flex items-center gap-1 text-xs font-semibold text-blue-800 hover:text-blue-950"
                           >
-                            Periksa
+                            {lang === 'EN' ? 'Inspect' : 'Periksa'}
                             <ArrowRight className="h-3 w-3" />
                           </button>
                         ) : (
@@ -296,14 +319,16 @@ export const TabRekapAnalisis: React.FC<TabRekapAnalisisProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-900 px-6 py-4 text-white">
           <div>
             <h2 className="text-sm font-semibold">
-              Rekapitulasi &amp; Analisis Capaian per Standar SPMI
+              {lang === 'EN'
+                ? 'Recap & Achievement Analysis per SPMI Standard'
+                : 'Rekapitulasi & Analisis Capaian per Standar SPMI'}
             </h2>
             <p className="text-xs text-slate-300 mt-0.5">
-              {program.nama_prodi} · Normalisasi Skor: (Rata-rata Capaian / 7) × 100
+              {translateProgramName(program.nama_prodi, lang)} · {lang === 'EN' ? 'Normalized Score: (Average Achievement / 7) × 100' : 'Normalisasi Skor: (Rata-rata Capaian / 7) × 100'}
             </p>
           </div>
           <span className="text-xs font-mono text-amber-400">
-            10 Standar · Auto-Calculated
+            {lang === 'EN' ? '10 Standards · Auto-Calculated' : '10 Standar · Auto-Calculated'}
           </span>
         </div>
 
@@ -311,16 +336,16 @@ export const TabRekapAnalisis: React.FC<TabRekapAnalisisProps> = ({
           <table className="w-full min-w-[980px] border-collapse text-left text-xs">
             <thead className="bg-slate-100 text-slate-700 border-b border-slate-200">
               <tr>
-                <th className="px-4 py-3 font-semibold">Standar SPMI</th>
+                <th className="px-4 py-3 font-semibold">{lang === 'EN' ? 'SPMI Standard' : 'Standar SPMI'}</th>
                 <th className="px-3 py-3 font-semibold text-right">
-                  Nilai Capaian (0–100)
+                  {lang === 'EN' ? 'Achievement Score (0–100)' : 'Nilai Capaian (0–100)'}
                 </th>
-                <th className="px-3 py-3 font-semibold">Sebutan Capaian</th>
+                <th className="px-3 py-3 font-semibold">{lang === 'EN' ? 'Achievement Predicate' : 'Sebutan Capaian'}</th>
                 <th className="px-3 py-3 font-semibold text-right">
-                  Nilai Target (0–100)
+                  {lang === 'EN' ? 'Target Score (0–100)' : 'Nilai Target (0–100)'}
                 </th>
-                <th className="px-3 py-3 font-semibold">Sebutan Target</th>
-                <th className="px-3 py-3 font-semibold">Kategori Temuan</th>
+                <th className="px-3 py-3 font-semibold">{lang === 'EN' ? 'Target Predicate' : 'Sebutan Target'}</th>
+                <th className="px-3 py-3 font-semibold">{lang === 'EN' ? 'Findings Category' : 'Kategori Temuan'}</th>
                 <th className="px-2.5 py-3 font-semibold text-center text-red-700">
                   Mayor
                 </th>
@@ -354,11 +379,11 @@ export const TabRekapAnalisis: React.FC<TabRekapAnalisisProps> = ({
                         <span className="font-mono text-slate-500 font-semibold mr-1">
                           {r.standardId}.
                         </span>
-                        <span className="flex-1">{r.nama}</span>
+                        <span className="flex-1">{translateStandardName(r.nama, lang)}</span>
                       </div>
                       <div className="mt-1.5 space-y-1">
                         <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                          <span>Progres: {evaluated} / {r.indicatorCount} Indikator</span>
+                          <span>{lang === 'EN' ? `Progress: ${evaluated} / ${r.indicatorCount} Indicators` : `Progres: ${evaluated} / ${r.indicatorCount} Indikator`}</span>
                           <span className="font-mono font-bold text-slate-800">{pct}%</span>
                         </div>
                         <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">

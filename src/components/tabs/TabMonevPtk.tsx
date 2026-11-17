@@ -14,6 +14,11 @@ import {
   getMonevBadgeClasses,
   getPtkWorkflowBadgeClasses,
 } from '../../utils/amiCalculations';
+import {
+  Language,
+  translateKategori,
+  translateMonevStatus,
+} from '../../utils/i18n';
 
 interface TabMonevPtkProps {
   indicators: AmiIndicator[];
@@ -22,6 +27,7 @@ interface TabMonevPtkProps {
   canUploadEvidence?: boolean;
   canVerifyClosed?: boolean;
   allowedStandardIds?: number[] | 'all';
+  lang?: Language;
   onUpdateEvaluation: (
     indicatorId: string,
     patch: Partial<AmiEvaluation>
@@ -37,6 +43,7 @@ export const TabMonevPtk: React.FC<TabMonevPtkProps> = ({
   canUploadEvidence,
   canVerifyClosed,
   allowedStandardIds = 'all',
+  lang = 'ID',
   onUpdateEvaluation,
 }) => {
   const [statusFilter, setStatusFilter] = useState<'all' | MonevStatus>('all');

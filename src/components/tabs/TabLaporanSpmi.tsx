@@ -68,6 +68,11 @@ import {
   computeAggregatedSpmiBundle,
   shortenFacultyName,
 } from '../../utils/spmiAggregateReport';
+import {
+  Language,
+  translateFaculty,
+  translateProgramName,
+} from '../../utils/i18n';
 
 interface TabLaporanSpmiProps {
   program: StudyProgramIdentity;
@@ -88,6 +93,7 @@ interface TabLaporanSpmiProps {
   canViewUniversityReport: boolean;
   roleDisplayName: string;
   canExport?: boolean;
+  lang?: Language;
 }
 
 const REPORT_CARDS: {
@@ -146,6 +152,7 @@ export const TabLaporanSpmi: React.FC<TabLaporanSpmiProps> = ({
   canViewUniversityReport = false,
   roleDisplayName = '',
   canExport = false,
+  lang = 'ID',
 }) => {
   const [scopeLevel, setScopeLevel] = useState<SpmiReportScopeLevel>('prodi');
   const [selectedFakultas, setSelectedFakultas] = useState<string>(
@@ -504,7 +511,9 @@ export const TabLaporanSpmi: React.FC<TabLaporanSpmiProps> = ({
               }`}
             >
               <SlidersHorizontal className="h-3.5 w-3.5" />
-              {showEditor ? 'Tutup Editor Metadata' : 'Edit Metadata & Narasi'}
+              {showEditor
+                ? (lang === 'EN' ? 'Close Metadata Editor' : 'Tutup Editor Metadata')
+                : (lang === 'EN' ? 'Edit Metadata & Narrative' : 'Edit Metadata & Narasi')}
             </button>
             {canExport && (
               <>
@@ -515,7 +524,9 @@ export const TabLaporanSpmi: React.FC<TabLaporanSpmiProps> = ({
                   className="inline-flex items-center gap-1.5 rounded-lg bg-blue-900 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-950 disabled:opacity-60 transition-colors"
                 >
                   <FileType2 className="h-4 w-4 text-amber-300" />
-                  {busyDocx ? 'Membuat Word...' : 'Export Word (.docx)'}
+                  {busyDocx
+                    ? (lang === 'EN' ? 'Generating Word...' : 'Membuat Word...')
+                    : (lang === 'EN' ? 'Export Word (.docx)' : 'Export Word (.docx)')}
                 </button>
                 <button
                   type="button"
@@ -524,7 +535,9 @@ export const TabLaporanSpmi: React.FC<TabLaporanSpmiProps> = ({
                   className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-amber-400 disabled:opacity-60 transition-colors"
                 >
                   <FileDown className="h-4 w-4" />
-                  {busyPdf ? 'Membuat PDF...' : 'Export PDF (.pdf)'}
+                  {busyPdf
+                    ? (lang === 'EN' ? 'Generating PDF...' : 'Membuat PDF...')
+                    : (lang === 'EN' ? 'Export PDF (.pdf)' : 'Export PDF (.pdf)')}
                 </button>
               </>
             )}

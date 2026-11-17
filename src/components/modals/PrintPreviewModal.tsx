@@ -21,6 +21,15 @@ import {
   getKategoriTemuan,
 } from '../../utils/amiCalculations';
 import { exportAmiPdf } from '../../utils/exportPdf';
+import {
+  Language,
+  translateStandardName,
+  translateFaculty,
+  translateProgramName,
+  translateSebutan,
+  translateKategori,
+  translateMonevStatus,
+} from '../../utils/i18n';
 
 export type PrintPreviewMode = 'ppepp_summary' | 'laporan_ami' | 'ptk_rtl';
 
@@ -43,6 +52,7 @@ interface PrintPreviewModalProps {
     indeks: number;
     label: string;
   };
+  lang?: Language;
 }
 
 function escapeHtml(val: string): string {
@@ -64,6 +74,7 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
   indicators,
   evaluations,
   ppeppStats,
+  lang = 'ID',
 }) => {
   const [busyPdf, setBusyPdf] = useState(false);
   const [feedback, setFeedback] = useState<{
@@ -91,9 +102,18 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
     );
 
   const titleByMode: Record<PrintPreviewMode, string> = {
-    ppepp_summary: 'RINGKASAN EVALUASI & EFEKTIFITAS SIKLUS PPEPP',
-    laporan_ami: 'LAPORAN EKSEKUTIF AUDIT MUTU INTERNAL (AMI) SPMI',
-    ptk_rtl: 'FORMULIR PERMINTAAN TINDAKAN KOREKSI (PTK) & RTL',
+    ppepp_summary:
+      lang === 'EN'
+        ? 'EVALUATION & EFFECTIVENESS SUMMARY OF THE PPEPP CYCLE'
+        : 'RINGKASAN EVALUASI & EFEKTIFITAS SIKLUS PPEPP',
+    laporan_ami:
+      lang === 'EN'
+        ? 'EXECUTIVE REPORT OF INTERNAL QUALITY AUDIT (AMI) SPMI'
+        : 'LAPORAN EKSEKUTIF AUDIT MUTU INTERNAL (AMI) SPMI',
+    ptk_rtl:
+      lang === 'EN'
+        ? 'CORRECTIVE ACTION REQUEST (CAR) & ACTION PLAN (RTL) FORM'
+        : 'FORMULIR PERMINTAAN TINDAKAN KOREKSI (PTK) & RTL',
   };
 
   const buildPrintableHtmlDoc = () => {
@@ -103,11 +123,11 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
         (r) => `
       <tr>
         <td style="text-align:center;font-family:monospace;">${r.standardId}</td>
-        <td>${escapeHtml(r.nama)}</td>
+        <td>${escapeHtml(translateStandardName(r.nama, lang))}</td>
         <td style="text-align:right;font-family:monospace;font-weight:bold;">${r.nilaiCapaian.toFixed(2)}</td>
-        <td>${escapeHtml(r.sebutanCapaian)}</td>
+        <td>${escapeHtml(translateSebutan(r.sebutanCapaian, lang))}</td>
         <td style="text-align:right;font-family:monospace;">${r.nilaiTarget.toFixed(2)}</td>
-        <td style="text-align:center;">${escapeHtml(r.kategoriTemuan ?? '-')}</td>
+        <td style="text-align:center;">${escapeHtml(r.kategoriTemuan ? translateKategori(r.kategoriTemuan, lang) : '-')}</td>
         <td style="text-align:center;font-family:monospace;">${r.counts.Mayor}/${r.counts.Minor}/${r.counts.Observasi}</td>
       </tr>`
       )
@@ -118,12 +138,12 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
         (row, idx) => `
       <tr>
         <td style="text-align:center;font-family:monospace;">${idx + 1}</td>
-        <td><strong>${escapeHtml(row.indicator.code)}</strong> (${escapeHtml(row.kategori ?? '-')})<br/>${escapeHtml(row.indicator.uraian)}</td>
+        <td><strong>${escapeHtml(row.indicator.code)}</strong> (${escapeHtml(row.kategori ? translateKategori(row.kategori, lang) : '-')})<br/>${escapeHtml(row.indicator.uraian)}</td>
         <td>${escapeHtml(row.evaluation.akar_masalah || '-')}</td>
         <td>${escapeHtml(row.evaluation.ptk_rtl || '-')}</td>
         <td>${escapeHtml(row.evaluation.pic || '-')}</td>
         <td style="font-family:monospace;">${escapeHtml(row.evaluation.waktu_ptk || '-')}</td>
-        <td style="text-align:center;">${escapeHtml(row.evaluation.monev_status)}</td>
+        <td style="text-align:center;">${escapeHtml(translateMonevStatus(row.evaluation.monev_status, lang))}</td>
       </tr>`
       )
       .join('');
@@ -131,15 +151,15 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
     const ppeppSectionHtml = ppeppStats
       ? `
       <div class="box" style="margin-bottom:16px;">
-        <strong>Ringkasan Indeks Efektifitas Siklus PPEPP: ${ppeppStats.indeks}% (${escapeHtml(ppeppStats.label)})</strong>
+        <strong>${lang === 'EN' ? 'Effectiveness Index Summary of PPEPP Cycle' : 'Ringkasan Indeks Efektifitas Siklus PPEPP'}: ${ppeppStats.indeks}% (${escapeHtml(ppeppStats.label)})</strong>
         <table style="margin-top:8px;">
           <thead>
             <tr>
-              <th>P1 Penetapan</th>
-              <th>P2 Pelaksanaan</th>
-              <th>E Evaluasi</th>
-              <th>P3 Pengendalian</th>
-              <th>P4 Peningkatan</th>
+              <th>${lang === 'EN' ? 'P1 Setting' : 'P1 Penetapan'}</th>
+              <th>${lang === 'EN' ? 'P2 Implementation' : 'P2 Pelaksanaan'}</th>
+              <th>${lang === 'EN' ? 'E Evaluation' : 'E Evaluasi'}</th>
+              <th>${lang === 'EN' ? 'P3 Control' : 'P3 Pengendalian'}</th>
+              <th>${lang === 'EN' ? 'P4 Improvement' : 'P4 Peningkatan'}</th>
             </tr>
           </thead>
           <tbody>
@@ -156,10 +176,10 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
       : '';
 
     return `<!doctype html>
-<html lang="id">
+<html lang="${lang === 'EN' ? 'en' : 'id'}">
 <head>
 <meta charset="utf-8" />
-<title>${escapeHtml(titleByMode[mode])} - ${escapeHtml(program.nama_prodi)}</title>
+<title>${escapeHtml(titleByMode[mode])} - ${escapeHtml(translateProgramName(program.nama_prodi, lang))}</title>
 <style>
   @page { size: A4 ${mode === 'ptk_rtl' ? 'landscape' : 'portrait'}; margin: 14mm; }
   body { font-family: Arial, Helvetica, sans-serif; color: #0f172a; font-size: 11px; line-height: 1.45; margin: 24px; }
@@ -178,42 +198,42 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
 </style>
 </head>
 <body>
-  <button class="no-print print-btn" onclick="window.print()">Cetak / Simpan sebagai PDF</button>
+  <button class="no-print print-btn" onclick="window.print()">${lang === 'EN' ? 'Print / Save as PDF' : 'Cetak / Simpan sebagai PDF'}</button>
   <div class="header">
     <img src="${logoUrl}" alt="Logo UNPATTI" />
     <div>
-      <div class="sub">KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI · UNIVERSITAS PATTIMURA</div>
+      <div class="sub">${lang === 'EN' ? 'MINISTRY OF HIGHER EDUCATION, SCIENCE, AND TECHNOLOGY · PATTIMURA UNIVERSITY' : 'KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI · UNIVERSITAS PATTIMURA'}</div>
       <div class="title">${escapeHtml(titleByMode[mode])}</div>
-      <div class="sub">Lembaga Penjaminan Mutu dan Pengembangan Pembelajaran (LPMPP) · Kampus Poka, Ambon 97233</div>
+      <div class="sub">${lang === 'EN' ? 'Quality Assurance and Learning Development Agency (LPMPP) · Poka Campus, Ambon 97233' : 'Lembaga Penjaminan Mutu dan Pengembangan Pembelajaran (LPMPP) · Kampus Poka, Ambon 97233'}</div>
     </div>
   </div>
   <div class="meta">
-    <div><strong>Program Studi:</strong> ${escapeHtml(program.kode_ps)} — ${escapeHtml(program.nama_prodi)}</div>
-    <div><strong>Siklus PPEPP:</strong> ${escapeHtml(cycle.tahun_siklus)}</div>
-    <div><strong>Fakultas:</strong> ${escapeHtml(program.fakultas)}</div>
-    <div><strong>Akreditasi:</strong> ${escapeHtml(program.peringkat_akreditasi)}</div>
-    <div><strong>Skor Terbobot AMI:</strong> ${overall.rataRataCapaianTerbobot.toFixed(2)} (${escapeHtml(overall.sebutanOverall)})</div>
-    <div><strong>Total Temuan KTS/OB:</strong> Mayor: ${overall.totalCounts.Mayor} | Minor: ${overall.totalCounts.Minor} | Observasi: ${overall.totalCounts.Observasi}</div>
+    <div><strong>${lang === 'EN' ? 'Study Program' : 'Program Studi'}:</strong> ${escapeHtml(program.kode_ps)} — ${escapeHtml(translateProgramName(program.nama_prodi, lang))}</div>
+    <div><strong>${lang === 'EN' ? 'PPEPP Cycle' : 'Siklus PPEPP'}:</strong> ${escapeHtml(cycle.tahun_siklus)}</div>
+    <div><strong>${lang === 'EN' ? 'Faculty' : 'Fakultas'}:</strong> ${escapeHtml(translateFaculty(program.fakultas, lang))}</div>
+    <div><strong>${lang === 'EN' ? 'Accreditation' : 'Akreditasi'}:</strong> ${escapeHtml(program.peringkat_akreditasi)}</div>
+    <div><strong>${lang === 'EN' ? 'Weighted AMI Score' : 'Skor Terbobot AMI'}:</strong> ${overall.rataRataCapaianTerbobot.toFixed(2)} (${escapeHtml(translateSebutan(overall.sebutanOverall, lang))})</div>
+    <div><strong>${lang === 'EN' ? 'Total Findings (CAR/Obs)' : 'Total Temuan KTS/OB'}:</strong> ${translateKategori('Mayor', lang)}: ${overall.totalCounts.Mayor} | ${translateKategori('Minor', lang)}: ${overall.totalCounts.Minor} | ${translateKategori('Observasi', lang)}: ${overall.totalCounts.Observasi}</div>
   </div>
   ${ppeppSectionHtml}
   ${
     mode === 'ptk_rtl'
       ? `<table>
           <thead>
-            <tr><th>No</th><th>Butir & Kategori</th><th>Akar Masalah/Penunjang</th><th>PTK / RTL</th><th>PIC</th><th>Batas Waktu</th><th>Status</th></tr>
+            <tr><th>No</th><th>${lang === 'EN' ? 'Item & Category' : 'Butir & Kategori'}</th><th>${lang === 'EN' ? 'Root Cause / Driver' : 'Akar Masalah/Penunjang'}</th><th>${lang === 'EN' ? 'CAR / RTL' : 'PTK / RTL'}</th><th>PIC</th><th>${lang === 'EN' ? 'Due Date' : 'Batas Waktu'}</th><th>${lang === 'EN' ? 'Status' : 'Status'}</th></tr>
           </thead>
           <tbody>${ptkRowsHtml}</tbody>
         </table>`
       : `<table>
           <thead>
-            <tr><th>No</th><th>Standar SPMI</th><th>Nilai Capaian</th><th>Sebutan</th><th>Target</th><th>Kategori</th><th>M/Mn/Ob</th></tr>
+            <tr><th>No</th><th>${lang === 'EN' ? 'SPMI Standard' : 'Standar SPMI'}</th><th>${lang === 'EN' ? 'Score' : 'Nilai Capaian'}</th><th>${lang === 'EN' ? 'Predicate' : 'Sebutan'}</th><th>${lang === 'EN' ? 'Target' : 'Target'}</th><th>${lang === 'EN' ? 'Category' : 'Kategori'}</th><th>${lang === 'EN' ? 'M/Mn/Ob' : 'M/Mn/Ob'}</th></tr>
           </thead>
           <tbody>
             ${recapRowsHtml}
             <tr style="font-weight:bold;background:#f1f5f9;">
-              <td colspan="2">RATA-RATA TERBOBOT / TOTAL TEMUAN</td>
+              <td colspan="2">${lang === 'EN' ? 'WEIGHTED AVERAGE / TOTAL FINDINGS' : 'RATA-RATA TERBOBOT / TOTAL TEMUAN'}</td>
               <td style="text-align:right;font-family:monospace;">${overall.rataRataCapaianTerbobot.toFixed(2)}</td>
-              <td>${escapeHtml(overall.sebutanOverall)}</td>
+              <td>${escapeHtml(translateSebutan(overall.sebutanOverall, lang))}</td>
               <td style="text-align:right;font-family:monospace;">${overall.rataRataTargetTerbobot.toFixed(2)}</td>
               <td>-</td>
               <td style="text-align:center;font-family:monospace;">${overall.totalCounts.Mayor}/${overall.totalCounts.Minor}/${overall.totalCounts.Observasi}</td>
@@ -223,15 +243,15 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
   }
   <div class="signs">
     <div>
-      <div>Mengetahui,</div>
-      <div><strong>Dekan ${escapeHtml(program.fakultas)}</strong></div>
+      <div>${lang === 'EN' ? 'Acknowledged by,' : 'Mengetahui,'}</div>
+      <div><strong>${lang === 'EN' ? `Dean of ${escapeHtml(translateFaculty(program.fakultas, lang))}` : `Dekan ${escapeHtml(program.fakultas)}`}</strong></div>
       <div style="height:56px;"></div>
       <div style="text-decoration:underline;font-weight:bold;">${escapeHtml(program.dekan_nama)}</div>
       <div style="font-family:monospace;font-size:10px;">NIP. ${escapeHtml(program.dekan_nip)}</div>
     </div>
     <div style="text-align:right;">
       <div>${escapeHtml(program.tempat_pengesahan || 'Ambon')}, ${escapeHtml(program.tahun_pengesahan || '2025')}</div>
-      <div><strong>Ketua Program Studi ${escapeHtml(program.nama_prodi)}</strong></div>
+      <div><strong>${lang === 'EN' ? `Head of Study Program ${escapeHtml(translateProgramName(program.nama_prodi, lang))}` : `Ketua Program Studi ${escapeHtml(program.nama_prodi)}`}</strong></div>
       <div style="height:56px;"></div>
       <div style="text-decoration:underline;font-weight:bold;">${escapeHtml(program.kaprodi_nama)}</div>
       <div style="font-family:monospace;font-size:10px;">NIP. ${escapeHtml(program.kaprodi_nip)}</div>
@@ -257,12 +277,18 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
       });
       setFeedback({
         ok: true,
-        text: `File PDF resmi "${fileName}" berhasil dibuat dan diunduh.`,
+        text:
+          lang === 'EN'
+            ? `Official PDF document "${fileName}" was successfully generated and downloaded.`
+            : `File PDF resmi "${fileName}" berhasil dibuat dan diunduh.`,
       });
     } catch {
       setFeedback({
         ok: false,
-        text: 'Gagal membuat PDF. Silakan gunakan tombol Unduh Dokumen (.html).',
+        text:
+          lang === 'EN'
+            ? 'Failed to generate PDF. Please use the Download Document (.html) button.'
+            : 'Gagal membuat PDF. Silakan gunakan tombol Unduh Dokumen (.html).',
       });
     } finally {
       setBusyPdf(false);
@@ -272,7 +298,6 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
   const handleBrowserPrint = () => {
     setFeedback(null);
     try {
-      // Print using a dedicated hidden iframe with clean A4 HTML to avoid modal scroll clipping
       const iframe = document.createElement('iframe');
       iframe.style.position = 'fixed';
       iframe.style.right = '0';
@@ -303,7 +328,10 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
         }, 300);
         setFeedback({
           ok: true,
-          text: 'Dialog cetak browser telah dipanggil. Jika dialog tidak muncul di pratinjau tersemat (iframe), gunakan tombol "Simpan PDF (.pdf)" di sebelahnya.',
+          text:
+            lang === 'EN'
+              ? 'Browser print dialog invoked. If it does not appear in iframe preview, click "Save PDF (.pdf)".'
+              : 'Dialog cetak browser telah dipanggil. Jika dialog tidak muncul di pratinjau tersemat (iframe), gunakan tombol "Simpan PDF (.pdf)" di sebelahnya.',
         });
         return;
       }
@@ -329,7 +357,10 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
     URL.revokeObjectURL(url);
     setFeedback({
       ok: true,
-      text: 'Dokumen siap cetak (.html) berhasil diunduh.',
+      text:
+        lang === 'EN'
+          ? 'Print-ready document (.html) successfully downloaded.'
+          : 'Dokumen siap cetak (.html) berhasil diunduh.',
     });
   };
 
@@ -352,10 +383,12 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
             />
             <div>
               <h3 className="text-sm font-semibold">
-                Pratinjau Dokumen Resmi PPEPP UNPATTI
+                {lang === 'EN'
+                  ? 'Official Document Preview PPEPP UNPATTI'
+                  : 'Pratinjau Dokumen Resmi PPEPP UNPATTI'}
               </h3>
               <p className="text-xs text-slate-300">
-                {program.kode_ps} — {program.nama_prodi} · Siklus{' '}
+                {program.kode_ps} — {translateProgramName(program.nama_prodi, lang)} · {lang === 'EN' ? 'Cycle' : 'Siklus'}{' '}
                 {cycle.tahun_siklus}
               </p>
             </div>
@@ -367,7 +400,7 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
               className="inline-flex items-center gap-1.5 rounded-lg border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700"
             >
               <Download className="h-3.5 w-3.5 text-amber-400" />
-              Unduh HTML
+              {lang === 'EN' ? 'Download HTML' : 'Unduh HTML'}
             </button>
             <button
               type="button"
@@ -375,7 +408,7 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
               className="inline-flex items-center gap-1.5 rounded-lg border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700"
             >
               <Printer className="h-3.5 w-3.5 text-slate-200" />
-              Cetak Printer
+              {lang === 'EN' ? 'Print' : 'Cetak Printer'}
             </button>
             <button
               type="button"
@@ -384,13 +417,15 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
               className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-3.5 py-1.5 text-xs font-bold text-slate-950 hover:bg-amber-400 disabled:opacity-60"
             >
               <FileDown className="h-3.5 w-3.5" />
-              {busyPdf ? 'Membuat PDF...' : 'Simpan PDF (.pdf)'}
+              {busyPdf
+                ? (lang === 'EN' ? 'Generating PDF...' : 'Membuat PDF...')
+                : (lang === 'EN' ? 'Save PDF (.pdf)' : 'Simpan PDF (.pdf)')}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="rounded-lg p-1.5 text-slate-300 hover:bg-slate-800 hover:text-white"
-              aria-label="Tutup pratinjau cetak"
+              aria-label={lang === 'EN' ? 'Close print preview' : 'Tutup pratinjau cetak'}
             >
               <X className="h-5 w-5" />
             </button>
@@ -426,13 +461,17 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
               />
               <div>
                 <div className="text-[11px] font-semibold tracking-wider text-slate-600 uppercase">
-                  Kementerian Pendidikan Tinggi, Sains, dan Teknologi · Universitas Pattimura
+                  {lang === 'EN'
+                    ? 'Ministry of Higher Education, Science, and Technology · Pattimura University'
+                    : 'Kementerian Pendidikan Tinggi, Sains, dan Teknologi · Universitas Pattimura'}
                 </div>
                 <h1 className="text-lg font-bold text-slate-950 leading-tight mt-0.5">
                   {titleByMode[mode]}
                 </h1>
                 <div className="text-xs text-slate-600 mt-0.5">
-                  Lembaga Penjaminan Mutu dan Pengembangan Pembelajaran (LPMPP) · Jl. Ir. M. Putuhena, Ambon 97233
+                  {lang === 'EN'
+                    ? 'Quality Assurance and Learning Development Agency (LPMPP) · Jl. Ir. M. Putuhena, Ambon 97233'
+                    : 'Lembaga Penjaminan Mutu dan Pengembangan Pembelajaran (LPMPP) · Jl. Ir. M. Putuhena, Ambon 97233'}
                 </div>
               </div>
             </div>
@@ -440,39 +479,39 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
             {/* Metadata Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs mb-5">
               <div>
-                <span className="text-slate-500">Program Studi:</span>{' '}
+                <span className="text-slate-500">{lang === 'EN' ? 'Study Program:' : 'Program Studi:'}</span>{' '}
                 <strong className="text-slate-900">
-                  {program.kode_ps} — {program.nama_prodi}
+                  {program.kode_ps} — {translateProgramName(program.nama_prodi, lang)}
                 </strong>
               </div>
               <div>
-                <span className="text-slate-500">Siklus PPEPP:</span>{' '}
+                <span className="text-slate-500">{lang === 'EN' ? 'PPEPP Cycle:' : 'Siklus PPEPP:'}</span>{' '}
                 <strong className="font-mono text-slate-900">
                   {cycle.tahun_siklus}
                 </strong>
               </div>
               <div>
-                <span className="text-slate-500">Fakultas:</span>{' '}
-                <strong className="text-slate-900">{program.fakultas}</strong>
+                <span className="text-slate-500">{lang === 'EN' ? 'Faculty:' : 'Fakultas:'}</span>{' '}
+                <strong className="text-slate-900">{translateFaculty(program.fakultas, lang)}</strong>
               </div>
               <div>
-                <span className="text-slate-500">Akreditasi:</span>{' '}
+                <span className="text-slate-500">{lang === 'EN' ? 'Accreditation:' : 'Akreditasi:'}</span>{' '}
                 <strong className="text-slate-900">
                   {program.peringkat_akreditasi}
                 </strong>
               </div>
               <div>
-                <span className="text-slate-500">Skor Terbobot AMI:</span>{' '}
+                <span className="text-slate-500">{lang === 'EN' ? 'Weighted AMI Score:' : 'Skor Terbobot AMI:'}</span>{' '}
                 <strong className="font-mono text-blue-900">
                   {overall.rataRataCapaianTerbobot.toFixed(2)} (
-                  {overall.sebutanOverall})
+                  {translateSebutan(overall.sebutanOverall, lang)})
                 </strong>
               </div>
               <div>
-                <span className="text-slate-500">Temuan KTS/OB:</span>{' '}
+                <span className="text-slate-500">{lang === 'EN' ? 'Findings (CAR/Obs):' : 'Temuan KTS/OB:'}</span>{' '}
                 <strong className="font-mono text-slate-900">
-                  Mayor {overall.totalCounts.Mayor} · Minor{' '}
-                  {overall.totalCounts.Minor} · Obs{' '}
+                  {translateKategori('Mayor', lang)} {overall.totalCounts.Mayor} · {translateKategori('Minor', lang)}{' '}
+                  {overall.totalCounts.Minor} · {translateKategori('Observasi', lang)}{' '}
                   {overall.totalCounts.Observasi}
                 </strong>
               </div>
@@ -483,19 +522,21 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
               <div className="mb-5 rounded-lg border border-slate-200 p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-xs font-bold uppercase tracking-wide text-slate-800">
-                    Rekapitulasi Efektifitas 5 Tahap Siklus PPEPP
+                    {lang === 'EN'
+                      ? '5-Stage PPEPP Cycle Effectiveness Breakdown'
+                      : 'Rekapitulasi Efektifitas 5 Tahap Siklus PPEPP'}
                   </h2>
                   <span className="font-mono text-sm font-bold text-blue-900">
-                    Indeks Komposit: {ppeppStats.indeks}% ({ppeppStats.label})
+                    {lang === 'EN' ? 'Composite Index' : 'Indeks Komposit'}: {ppeppStats.indeks}% ({ppeppStats.label})
                   </span>
                 </div>
                 <div className="grid grid-cols-5 gap-2 text-center text-xs">
                   {[
-                    { k: 'P1 · Penetapan', v: ppeppStats.penetapan },
-                    { k: 'P2 · Pelaksanaan', v: ppeppStats.pelaksanaan },
-                    { k: 'E · Evaluasi', v: ppeppStats.evaluasi },
-                    { k: 'P3 · Pengendalian', v: ppeppStats.pengendalian },
-                    { k: 'P4 · Peningkatan', v: ppeppStats.peningkatan },
+                    { k: lang === 'EN' ? 'P1 · Setting' : 'P1 · Penetapan', v: ppeppStats.penetapan },
+                    { k: lang === 'EN' ? 'P2 · Implementation' : 'P2 · Pelaksanaan', v: ppeppStats.pelaksanaan },
+                    { k: lang === 'EN' ? 'E · Evaluation' : 'E · Evaluasi', v: ppeppStats.evaluasi },
+                    { k: lang === 'EN' ? 'P3 · Control' : 'P3 · Pengendalian', v: ppeppStats.pengendalian },
+                    { k: lang === 'EN' ? 'P4 · Improvement' : 'P4 · Peningkatan', v: ppeppStats.peningkatan },
                   ].map((item) => (
                     <div
                       key={item.k}
@@ -520,19 +561,19 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
                       No
                     </th>
                     <th className="border border-slate-400 px-2.5 py-2">
-                      Butir & Kategori
+                      {lang === 'EN' ? 'Item & Category' : 'Butir & Kategori'}
                     </th>
                     <th className="border border-slate-400 px-2.5 py-2">
-                      Akar Masalah/Penunjang
+                      {lang === 'EN' ? 'Root Cause / Driver' : 'Akar Masalah/Penunjang'}
                     </th>
                     <th className="border border-slate-400 px-2.5 py-2">
-                      PTK / RTL
+                      {lang === 'EN' ? 'CAR / RTL' : 'PTK / RTL'}
                     </th>
                     <th className="border border-slate-400 px-2.5 py-2">
-                      PIC & Batas Waktu
+                      {lang === 'EN' ? 'PIC & Due Date' : 'PIC & Batas Waktu'}
                     </th>
                     <th className="border border-slate-400 px-2.5 py-2">
-                      Status Monev
+                      {lang === 'EN' ? 'Monev Status' : 'Status Monev'}
                     </th>
                   </tr>
                 </thead>
@@ -552,7 +593,7 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
                               row.kategori
                             )}`}
                           >
-                            {row.kategori}
+                            {row.kategori ? translateKategori(row.kategori, lang) : '-'}
                           </span>
                         </div>
                         <div className="text-[11px] text-slate-700">
@@ -572,7 +613,7 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
                         </div>
                       </td>
                       <td className="border border-slate-300 px-2.5 py-2 text-[11px] font-semibold">
-                        {row.evaluation.monev_status}
+                        {translateMonevStatus(row.evaluation.monev_status, lang)}
                       </td>
                     </tr>
                   ))}
@@ -586,19 +627,19 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
                       No
                     </th>
                     <th className="border border-slate-400 px-2.5 py-2">
-                      Standar SPMI
+                      {lang === 'EN' ? 'SPMI Standard' : 'Standar SPMI'}
                     </th>
                     <th className="border border-slate-400 px-2.5 py-2 text-right">
-                      Capaian
+                      {lang === 'EN' ? 'Score' : 'Capaian'}
                     </th>
                     <th className="border border-slate-400 px-2.5 py-2">
-                      Sebutan Capaian
+                      {lang === 'EN' ? 'Predicate' : 'Sebutan Capaian'}
                     </th>
                     <th className="border border-slate-400 px-2.5 py-2 text-right">
-                      Target
+                      {lang === 'EN' ? 'Target' : 'Target'}
                     </th>
                     <th className="border border-slate-400 px-2.5 py-2">
-                      Kategori
+                      {lang === 'EN' ? 'Category' : 'Kategori'}
                     </th>
                     <th className="border border-slate-400 px-2.5 py-2 text-center">
                       M / Mn / Ob
@@ -612,13 +653,13 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
                         {r.standardId}
                       </td>
                       <td className="border border-slate-300 px-2.5 py-2 font-medium">
-                        {r.nama}
+                        {translateStandardName(r.nama, lang)}
                       </td>
                       <td className="border border-slate-300 px-2.5 py-2 text-right font-mono font-bold">
                         {r.nilaiCapaian.toFixed(2)}
                       </td>
                       <td className="border border-slate-300 px-2.5 py-2 text-[11px]">
-                        {r.sebutanCapaian}
+                        {translateSebutan(r.sebutanCapaian, lang)}
                       </td>
                       <td className="border border-slate-300 px-2.5 py-2 text-right font-mono">
                         {r.nilaiTarget.toFixed(2)}
@@ -629,7 +670,7 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
                             r.kategoriTemuan
                           )}`}
                         >
-                          {r.kategoriTemuan ?? '-'}
+                          {r.kategoriTemuan ? translateKategori(r.kategoriTemuan, lang) : '-'}
                         </span>
                       </td>
                       <td className="border border-slate-300 px-2.5 py-2 text-center font-mono">
@@ -643,13 +684,13 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
                       colSpan={2}
                       className="border border-slate-300 px-2.5 py-2"
                     >
-                      RATA-RATA TERBOBOT / TOTAL TEMUAN
+                      {lang === 'EN' ? 'WEIGHTED AVERAGE / TOTAL FINDINGS' : 'RATA-RATA TERBOBOT / TOTAL TEMUAN'}
                     </td>
                     <td className="border border-slate-300 px-2.5 py-2 text-right font-mono">
                       {overall.rataRataCapaianTerbobot.toFixed(2)}
                     </td>
                     <td className="border border-slate-300 px-2.5 py-2">
-                      {overall.sebutanOverall}
+                      {translateSebutan(overall.sebutanOverall, lang)}
                     </td>
                     <td className="border border-slate-300 px-2.5 py-2 text-right font-mono">
                       {overall.rataRataTargetTerbobot.toFixed(2)}
@@ -667,8 +708,10 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
             {/* Official Signature Block */}
             <div className="grid grid-cols-2 gap-8 pt-4 text-xs">
               <div>
-                <p>Mengetahui,</p>
-                <p className="font-semibold">Dekan {program.fakultas}</p>
+                <p>{lang === 'EN' ? 'Acknowledged by,' : 'Mengetahui,'}</p>
+                <p className="font-semibold">
+                  {lang === 'EN' ? `Dean of ${translateFaculty(program.fakultas, lang)}` : `Dekan ${program.fakultas}`}
+                </p>
                 <div className="h-14" />
                 <p className="font-semibold underline underline-offset-4">
                   {program.dekan_nama ||
@@ -684,7 +727,9 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
                   {program.tahun_pengesahan || '2025'}
                 </p>
                 <p className="font-semibold">
-                  Ketua Program Studi {program.nama_prodi}
+                  {lang === 'EN'
+                    ? `Head of Study Program ${translateProgramName(program.nama_prodi, lang)}`
+                    : `Ketua Program Studi ${program.nama_prodi}`}
                 </p>
                 <div className="h-14" />
                 <p className="font-semibold underline underline-offset-4">

@@ -155,7 +155,16 @@ export const UNPATTI_118_PROGRAMS: StudyProgramIdentity[] = RAW_UNPATTI_118.map(
       item.nama_prodi.includes('Guru') ||
       item.nama_prodi.includes('Jasmani');
 
-    const fakultasName = FACULTY_FULL_NAME[item.fakultas_raw] || item.fakultas_raw;
+    // Strict rule: ALL S2 and S3 programs belong to Pascasarjana
+    const isPasca =
+      item.jenjang === 'S2' ||
+      item.jenjang === 'S3' ||
+      item.nama_prodi.startsWith('S2 ') ||
+      item.nama_prodi.startsWith('S3 ');
+
+    const fakultasName = isPasca
+      ? 'Pascasarjana'
+      : FACULTY_FULL_NAME[item.fakultas_raw] || item.fakultas_raw;
 
     return {
       id: `prodi-unpatti-${idx + 1}-${item.kode_ps}`,

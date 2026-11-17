@@ -16,6 +16,13 @@ import {
   StandardRecap,
   StudyProgramIdentity,
 } from '../../types/ami';
+import {
+  Language,
+  translateFaculty,
+  translateProgramName,
+  translateStandardName,
+  t,
+} from '../../utils/i18n';
 
 interface TabLaporanVisualisasiProps {
   program: StudyProgramIdentity;
@@ -25,6 +32,7 @@ interface TabLaporanVisualisasiProps {
   onPrintPdf: () => void;
   onExportExcel: () => void;
   canExport?: boolean;
+  lang?: Language;
 }
 
 export const TabLaporanVisualisasi: React.FC<TabLaporanVisualisasiProps> = ({
@@ -35,29 +43,36 @@ export const TabLaporanVisualisasi: React.FC<TabLaporanVisualisasiProps> = ({
   onPrintPdf,
   onExportExcel,
   canExport = false,
+  lang = 'ID',
 }) => {
+  const obsKey = lang === 'EN' ? 'Observation' : 'Observasi';
+  const minKey = lang === 'EN' ? 'Minor' : 'Minor';
+  const mayKey = lang === 'EN' ? 'Major' : 'Mayor';
+  const capKey = lang === 'EN' ? 'Achievement score (0-100)' : 'Nilai capaian (0-100)';
+  const tarKey = lang === 'EN' ? 'Target score (0-100)' : 'Nilai target (0-100)';
+
   // Chart 1 data: Horizontal Grouped Bar Chart (Jumlah Temuan per Standar)
   const findingsChartData = [...recaps]
     .reverse()
     .map((r) => ({
-      name: `${r.standardId}. ${r.nama.replace('Standar ', '')}`,
+      name: `${r.standardId}. ${translateStandardName(r.nama, lang).replace(/^(Standar|Standard)\s+/, '')}`,
       'Best Practice': r.counts['Best Practice'],
-      Observasi: r.counts.Observasi,
-      Minor: r.counts.Minor,
-      Mayor: r.counts.Mayor,
+      [obsKey]: r.counts.Observasi,
+      [minKey]: r.counts.Minor,
+      [mayKey]: r.counts.Mayor,
     }));
 
   // Chart 2 data: Horizontal Paired Bar Chart (Nilai Capaian vs Target + Rata-rata terboboti at top)
   const scoreChartData = [
     {
-      name: 'Rata-rata terboboti',
-      'Nilai capaian (0-100)': overall.rataRataCapaianTerbobot,
-      'Nilai target (0-100)': overall.rataRataTargetTerbobot,
+      name: lang === 'EN' ? 'Weighted Average' : 'Rata-rata terboboti',
+      [capKey]: overall.rataRataCapaianTerbobot,
+      [tarKey]: overall.rataRataTargetTerbobot,
     },
     ...[...recaps].reverse().map((r) => ({
-      name: `${r.standardId}. ${r.nama.replace('Standar ', '')}`,
-      'Nilai capaian (0-100)': r.nilaiCapaian,
-      'Nilai target (0-100)': r.nilaiTarget,
+      name: `${r.standardId}. ${translateStandardName(r.nama, lang).replace(/^(Standar|Standard)\s+/, '')}`,
+      [capKey]: r.nilaiCapaian,
+      [tarKey]: r.nilaiTarget,
     })),
   ];
 
@@ -67,10 +82,14 @@ export const TabLaporanVisualisasi: React.FC<TabLaporanVisualisasiProps> = ({
       <div className="no-print flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-6 py-4">
         <div>
           <h2 className="text-base font-bold text-slate-900">
-            Laporan Eksekutif AMI & Visualisasi Grafik
+            {lang === 'EN'
+              ? 'AMI Executive Report & Chart Visualizations'
+              : 'Laporan Eksekutif AMI & Visualisasi Grafik'}
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Siap dicetak sebagai PDF resmi LPMPP Universitas Pattimura atau diunduh ke Excel.
+            {lang === 'EN'
+              ? 'Ready to print as official Pattimura University LPMPP PDF or download as Excel.'
+              : 'Siap dicetak sebagai PDF resmi LPMPP Universitas Pattimura atau diunduh ke Excel.'}
           </p>
         </div>
         {canExport && (
@@ -81,7 +100,7 @@ export const TabLaporanVisualisasi: React.FC<TabLaporanVisualisasiProps> = ({
               className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50 transition-colors"
             >
               <FileSpreadsheet className="h-4 w-4 text-emerald-700" />
-              Export Excel (.xlsx)
+              {lang === 'EN' ? 'Export Excel (.xlsx)' : 'Export Excel (.xlsx)'}
             </button>
             <button
               type="button"
@@ -89,7 +108,7 @@ export const TabLaporanVisualisasi: React.FC<TabLaporanVisualisasiProps> = ({
               className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition-colors"
             >
               <Printer className="h-4 w-4 text-amber-400" />
-              Cetak / Export PDF
+              {lang === 'EN' ? 'Print / Export PDF' : 'Cetak / Export PDF'}
             </button>
           </div>
         )}
@@ -106,28 +125,34 @@ export const TabLaporanVisualisasi: React.FC<TabLaporanVisualisasiProps> = ({
             />
             <div>
               <div className="text-xs font-semibold uppercase tracking-wider text-blue-900">
-                Lembaga Penjaminan Mutu dan Pengembangan Pembelajaran (LPMPP)
+                {lang === 'EN'
+                  ? 'Institute for Quality Assurance and Learning Development (LPMPP)'
+                  : 'Lembaga Penjaminan Mutu dan Pengembangan Pembelajaran (LPMPP)'}
               </div>
               <h1 className="mt-1 text-xl font-bold text-slate-900">
-                REKAPITULASI HASIL AUDIT MUTU INTERNAL (AMI) SPMI
+                {lang === 'EN'
+                  ? 'RECAPITULATION OF SPMI INTERNAL QUALITY AUDIT (AMI) RESULTS'
+                  : 'REKAPITULASI HASIL AUDIT MUTU INTERNAL (AMI) SPMI'}
               </h1>
               <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
-                <span>{program.nama_pt}</span>
+                <span>{lang === 'EN' ? 'Pattimura University' : program.nama_pt}</span>
                 <span aria-hidden="true">·</span>
-                <span>{program.fakultas}</span>
+                <span>{translateFaculty(program.fakultas, lang)}</span>
                 <span aria-hidden="true">·</span>
                 <span className="font-semibold text-slate-900">
-                  {program.kode_ps} — {program.nama_prodi}
+                  {program.kode_ps} — {translateProgramName(program.nama_prodi, lang)}
                 </span>
                 <span aria-hidden="true">·</span>
-                <span>Siklus {cycle.tahun_siklus}</span>
+                <span>
+                  {lang === 'EN' ? 'Cycle' : 'Siklus'} {cycle.tahun_siklus}
+                </span>
               </div>
             </div>
           </div>
 
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-5 py-3 text-right">
             <div className="text-[11px] font-medium text-slate-500">
-              Skor Terbobot AMI Prodi
+              {lang === 'EN' ? 'Program Weighted AMI Score' : 'Skor Terbobot AMI Prodi'}
             </div>
             <div className="text-3xl font-bold font-mono tabular-nums text-slate-900">
               {overall.rataRataCapaianTerbobot.toFixed(2)}
@@ -141,31 +166,41 @@ export const TabLaporanVisualisasi: React.FC<TabLaporanVisualisasiProps> = ({
         {/* Summary Metrics */}
         <div className="mt-5 grid grid-cols-2 sm:grid-cols-6 gap-3 text-center">
           <div className="rounded-lg border border-slate-200 p-3">
-            <div className="text-[11px] text-slate-500">Total Indikator</div>
+            <div className="text-[11px] text-slate-500">
+              {lang === 'EN' ? 'Total Indicators' : 'Total Indikator'}
+            </div>
             <div className="mt-0.5 text-lg font-bold font-mono tabular-nums text-slate-900">
               {overall.totalIndikator}
             </div>
           </div>
           <div className="rounded-lg border border-red-200 bg-red-50/50 p-3">
-            <div className="text-[11px] text-red-700 font-medium">Mayor</div>
+            <div className="text-[11px] text-red-700 font-medium">
+              {lang === 'EN' ? 'Major' : 'Mayor'}
+            </div>
             <div className="mt-0.5 text-lg font-bold font-mono tabular-nums text-red-700">
               {overall.totalCounts.Mayor}
             </div>
           </div>
           <div className="rounded-lg border border-orange-200 bg-orange-50/50 p-3">
-            <div className="text-[11px] text-orange-700 font-medium">Minor</div>
+            <div className="text-[11px] text-orange-700 font-medium">
+              {lang === 'EN' ? 'Minor' : 'Minor'}
+            </div>
             <div className="mt-0.5 text-lg font-bold font-mono tabular-nums text-orange-700">
               {overall.totalCounts.Minor}
             </div>
           </div>
           <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-3">
-            <div className="text-[11px] text-amber-800 font-medium">Observasi</div>
+            <div className="text-[11px] text-amber-800 font-medium">
+              {lang === 'EN' ? 'Observation' : 'Observasi'}
+            </div>
             <div className="mt-0.5 text-lg font-bold font-mono tabular-nums text-amber-800">
               {overall.totalCounts.Observasi}
             </div>
           </div>
           <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-3">
-            <div className="text-[11px] text-emerald-700 font-medium">Sesuai (Baik)</div>
+            <div className="text-[11px] text-emerald-700 font-medium">
+              {lang === 'EN' ? 'Achieved (Good)' : 'Sesuai (Baik)'}
+            </div>
             <div className="mt-0.5 text-lg font-bold font-mono tabular-nums text-emerald-700">
               {overall.totalCounts['Sesuai (Baik)']}
             </div>
@@ -185,10 +220,14 @@ export const TabLaporanVisualisasi: React.FC<TabLaporanVisualisasiProps> = ({
         <div className="rounded-xl border border-slate-200 bg-white p-6 print-break-inside-avoid">
           <div className="mb-4">
             <h3 className="text-sm font-bold text-slate-900">
-              Grafik 1. Jumlah Temuan per Standar SPMI
+              {lang === 'EN'
+                ? 'Chart 1. Number of Findings per SPMI Standard'
+                : 'Grafik 1. Jumlah Temuan per Standar SPMI'}
             </h3>
             <p className="text-xs text-slate-500">
-              Distribusi Best Practice, Observasi, Minor, dan Mayor pada 10 Standar
+              {lang === 'EN'
+                ? 'Distribution of Best Practice, Observation, Minor, and Major on 10 Standards'
+                : 'Distribusi Best Practice, Observasi, Minor, dan Mayor pada 10 Standar'}
             </p>
           </div>
           <div className="h-[460px] w-full">
@@ -215,9 +254,9 @@ export const TabLaporanVisualisasi: React.FC<TabLaporanVisualisasiProps> = ({
                 />
                 <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '8px' }} />
                 <Bar dataKey="Best Practice" fill="#0284c7" radius={[0, 3, 3, 0]} />
-                <Bar dataKey="Observasi" fill="#f59e0b" radius={[0, 3, 3, 0]} />
-                <Bar dataKey="Minor" fill="#ea580c" radius={[0, 3, 3, 0]} />
-                <Bar dataKey="Mayor" fill="#dc2626" radius={[0, 3, 3, 0]} />
+                <Bar dataKey={obsKey} fill="#f59e0b" radius={[0, 3, 3, 0]} />
+                <Bar dataKey={minKey} fill="#ea580c" radius={[0, 3, 3, 0]} />
+                <Bar dataKey={mayKey} fill="#dc2626" radius={[0, 3, 3, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -227,10 +266,14 @@ export const TabLaporanVisualisasi: React.FC<TabLaporanVisualisasiProps> = ({
         <div className="rounded-xl border border-slate-200 bg-white p-6 print-break-inside-avoid">
           <div className="mb-4">
             <h3 className="text-sm font-bold text-slate-900">
-              Grafik 2. Perbandingan Nilai Capaian vs Nilai Target per Standar
+              {lang === 'EN'
+                ? 'Chart 2. Comparison of Achievement vs Target Score per Standard'
+                : 'Grafik 2. Perbandingan Nilai Capaian vs Nilai Target per Standar'}
             </h3>
             <p className="text-xs text-slate-500">
-              Skala terstandarisasi 0–100 termasuk Rata-rata Terboboti
+              {lang === 'EN'
+                ? 'Standardized 0–100 scale including Weighted Average'
+                : 'Skala terstandarisasi 0–100 termasuk Rata-rata Terboboti'}
             </p>
           </div>
           <div className="h-[460px] w-full">
@@ -260,8 +303,8 @@ export const TabLaporanVisualisasi: React.FC<TabLaporanVisualisasiProps> = ({
                   }}
                 />
                 <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '8px' }} />
-                <Bar dataKey="Nilai capaian (0-100)" fill="#1e3a8a" radius={[0, 3, 3, 0]} />
-                <Bar dataKey="Nilai target (0-100)" fill="#d97706" radius={[0, 3, 3, 0]} />
+                <Bar dataKey={capKey} fill="#1e3a8a" radius={[0, 3, 3, 0]} />
+                <Bar dataKey={tarKey} fill="#d97706" radius={[0, 3, 3, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

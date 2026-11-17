@@ -12,6 +12,11 @@ import {
   getKategoriBadgeClasses,
   getKategoriTemuan,
 } from '../../utils/amiCalculations';
+import {
+  Language,
+  translateKategori,
+  translateIndicatorUraian,
+} from '../../utils/i18n';
 
 interface PlorCaModalProps {
   indicator: AmiIndicator | null;
@@ -33,6 +38,7 @@ interface PlorCaModalProps {
       kategori_override: KategoriTemuan | null;
     }
   ) => void;
+  lang?: Language;
 }
 
 const KATEGORI_OPTIONS: KategoriTemuan[] = [
@@ -52,6 +58,7 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
   roleNote,
   onClose,
   onSave,
+  lang = 'ID',
 }) => {
   const [akarMasalah, setAkarMasalah] = useState('');
   const [plorCa, setPlorCa] = useState<PlorCaData>({
@@ -126,19 +133,19 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
         <div className="flex items-start justify-between gap-4 border-b border-slate-200 bg-slate-900 px-6 py-4 text-white">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs font-mono text-amber-400">
-              <span>PLOR+CA & PTK/RTL Editor</span>
+              <span>{lang === 'EN' ? 'PLOR+CA & Action Plan Editor' : 'PLOR+CA & PTK/RTL Editor'}</span>
               <span aria-hidden="true">·</span>
-              <span>Indikator {indicator.code}</span>
+              <span>{lang === 'EN' ? 'Indicator' : 'Indikator'} {indicator.code}</span>
             </div>
             <h3 className="mt-1 text-sm font-semibold text-white leading-snug">
-              {indicator.uraian}
+              {translateIndicatorUraian(indicator.uraian, lang)}
             </h3>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="rounded-lg p-1.5 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
-            aria-label="Tutup modal PLOR+CA"
+            aria-label={lang === 'EN' ? 'Close PLOR+CA modal' : 'Tutup modal PLOR+CA'}
           >
             <X className="h-5 w-5" />
           </button>
@@ -151,8 +158,12 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
               <span>
                 {roleNote ||
                   (!canEditPtkDraft
-                    ? 'Mode Hanya Baca aktif: Analisis PLOR+CA & PTK tidak dapat diubah oleh peran ini.'
-                    : 'Anda berada pada Mode Auditee. Field penetapan temuan PLOR+CA & override kategori dikunci untuk Auditor AMI. Anda tetap dapat mengusulkan RTL & PIC.')}
+                    ? (lang === 'EN'
+                        ? 'Read-Only Mode active: PLOR+CA analysis & CAR/RTL cannot be modified by this role.'
+                        : 'Mode Hanya Baca aktif: Analisis PLOR+CA & PTK tidak dapat diubah oleh peran ini.')
+                    : (lang === 'EN'
+                        ? 'You are in Auditee Mode. PLOR+CA finding assignment & category override are reserved for AMI Auditors. You can still propose CAR action plans & PIC.'
+                        : 'Anda berada pada Mode Auditee. Field penetapan temuan PLOR+CA & override kategori dikunci untuk Auditor AMI. Anda tetap dapat mengusulkan RTL & PIC.'))}
               </span>
             </div>
           )}
@@ -161,7 +172,7 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
             <div>
               <div className="text-xs font-medium text-slate-500">
-                Kategori Temuan Terhitung
+                {lang === 'EN' ? 'Calculated Finding Category' : 'Kategori Temuan Terhitung'}
               </div>
               <div className="mt-1.5 flex items-center gap-2">
                 <span
@@ -169,18 +180,19 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
                     effectiveKategori
                   )}`}
                 >
-                  {effectiveKategori ?? '-'}
+                  {effectiveKategori ? translateKategori(effectiveKategori, lang) : '-'}
                 </span>
                 {kategoriOverride && (
                   <span className="text-xs text-slate-500">
-                    (Override dari: {autoKategori ?? '-'})
+                    ({lang === 'EN' ? 'Overridden from: ' : 'Override dari: '}
+                    {autoKategori ? translateKategori(autoKategori, lang) : '-'})
                   </span>
                 )}
               </div>
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-700">
-                Penetapan Manual Auditor (Opsional)
+                {lang === 'EN' ? 'Auditor Manual Override (Optional)' : 'Penetapan Manual Auditor (Opsional)'}
               </label>
               <select
                 disabled={!isAuditor}
@@ -192,10 +204,12 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
                 }
                 className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 disabled:bg-slate-100 disabled:text-slate-500"
               >
-                <option value="">Otomatis ({autoKategori ?? '-'})</option>
+                <option value="">
+                  {lang === 'EN' ? 'Automatic' : 'Otomatis'} ({autoKategori ? translateKategori(autoKategori, lang) : '-'})
+                </option>
                 {KATEGORI_OPTIONS.map((opt) => (
                   <option key={opt} value={opt}>
-                    {opt}
+                    {translateKategori(opt, lang)}
                   </option>
                 ))}
               </select>
@@ -206,7 +220,7 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
           <div>
             <div className="flex items-center justify-between mb-2">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-700">
-                Analisis Temuan Terstruktur (PLOR + CA)
+                {lang === 'EN' ? 'Structured Finding Analysis (PLOR + CA)' : 'Analisis Temuan Terstruktur (PLOR + CA)'}
               </h4>
               {isAuditor && (
                 <button
@@ -214,14 +228,14 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
                   onClick={handleSyncNarrativeFromPlor}
                   className="text-xs font-medium text-blue-800 hover:text-blue-950 underline"
                 >
-                  Gabungkan ke Narasi Akar Masalah
+                  {lang === 'EN' ? 'Combine into Root Cause Narrative' : 'Gabungkan ke Narasi Akar Masalah'}
                 </button>
               )}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">
-                  P — Problem (Masalah Utama)
+                  {lang === 'EN' ? 'P — Problem (Main Non-conformity)' : 'P — Problem (Masalah Utama)'}
                 </label>
                 <textarea
                   rows={2}
@@ -230,13 +244,17 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
                   onChange={(e) =>
                     setPlorCa((p) => ({ ...p, problem: e.target.value }))
                   }
-                  placeholder="Ketidaksesuaian atau kesenjangan yang ditemukan..."
+                  placeholder={
+                    lang === 'EN'
+                      ? 'Observed non-conformity or gap...'
+                      : 'Ketidaksesuaian atau kesenjangan yang ditemukan...'
+                  }
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-xs text-slate-900 focus:border-blue-800 focus:outline-none disabled:bg-slate-100"
                 />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">
-                  L — Location (Lokasi / Dokumen / Unit)
+                  {lang === 'EN' ? 'L — Location (Department / Unit / Document)' : 'L — Location (Lokasi / Dokumen / Unit)'}
                 </label>
                 <textarea
                   rows={2}
@@ -245,13 +263,17 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
                   onChange={(e) =>
                     setPlorCa((p) => ({ ...p, location: e.target.value }))
                   }
-                  placeholder="Contoh: Arsip Kurikulum Prodi / SIAKAD..."
+                  placeholder={
+                    lang === 'EN'
+                      ? 'e.g. Study Program Curriculum Archive / SIAKAD...'
+                      : 'Contoh: Arsip Kurikulum Prodi / SIAKAD...'
+                  }
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-xs text-slate-900 focus:border-blue-800 focus:outline-none disabled:bg-slate-100"
                 />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">
-                  O — Objective Evidence (Bukti Objektif)
+                  {lang === 'EN' ? 'O — Objective Evidence' : 'O — Objective Evidence (Bukti Objektif)'}
                 </label>
                 <textarea
                   rows={2}
@@ -263,13 +285,17 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
                       objectiveEvidence: e.target.value,
                     }))
                   }
-                  placeholder="Fakta terverifikasi saat audit dokumen/wawancara..."
+                  placeholder={
+                    lang === 'EN'
+                      ? 'Facts verified during document audit / interview...'
+                      : 'Fakta terverifikasi saat audit dokumen/wawancara...'
+                  }
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-xs text-slate-900 focus:border-blue-800 focus:outline-none disabled:bg-slate-100"
                 />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">
-                  R — Reference (Standar / Regulasi Acuan)
+                  {lang === 'EN' ? 'R — Reference (Standard / Benchmark Regulation)' : 'R — Reference (Standar / Regulasi Acuan)'}
                 </label>
                 <textarea
                   rows={2}
@@ -278,13 +304,17 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
                   onChange={(e) =>
                     setPlorCa((p) => ({ ...p, reference: e.target.value }))
                   }
-                  placeholder="Contoh: Standar SPMI UNPATTI / Permendikbudristek 53/2023..."
+                  placeholder={
+                    lang === 'EN'
+                      ? 'e.g. UNPATTI SPMI Standard / Permendikbudristek 53/2023...'
+                      : 'Contoh: Standar SPMI UNPATTI / Permendikbudristek 53/2023...'
+                  }
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-xs text-slate-900 focus:border-blue-800 focus:outline-none disabled:bg-slate-100"
                 />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">
-                  C — Correction (Koreksi Segera)
+                  {lang === 'EN' ? 'C — Correction (Immediate Action)' : 'C — Correction (Koreksi Segera)'}
                 </label>
                 <textarea
                   rows={2}
@@ -293,13 +323,17 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
                   onChange={(e) =>
                     setPlorCa((p) => ({ ...p, correction: e.target.value }))
                   }
-                  placeholder="Tindakan perbaikan cepat atas temuan..."
+                  placeholder={
+                    lang === 'EN'
+                      ? 'Immediate corrective actions for the finding...'
+                      : 'Tindakan perbaikan cepat atas temuan...'
+                  }
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-xs text-slate-900 focus:border-blue-800 focus:outline-none disabled:bg-slate-100"
                 />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">
-                  A — Action (Tindakan Pencegahan Sistemik)
+                  {lang === 'EN' ? 'A — Action (Preventive Systemic Action)' : 'A — Action (Tindakan Pencegahan Sistemik)'}
                 </label>
                 <textarea
                   rows={2}
@@ -308,7 +342,11 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
                   onChange={(e) =>
                     setPlorCa((p) => ({ ...p, action: e.target.value }))
                   }
-                  placeholder="Langkah pencegahan agar tidak berulang..."
+                  placeholder={
+                    lang === 'EN'
+                      ? 'Preventive steps to avoid recurrence...'
+                      : 'Langkah pencegahan agar tidak berulang...'
+                  }
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-xs text-slate-900 focus:border-blue-800 focus:outline-none disabled:bg-slate-100"
                 />
               </div>
@@ -318,14 +356,20 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
           {/* Narrative Summary */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Narasi Akar Masalah / Faktor Penunjang (Tampil di Daftar Temuan & PTK)
+              {lang === 'EN'
+                ? 'Root Cause / Driving Factor Narrative (Appears in Findings List & CAR)'
+                : 'Narasi Akar Masalah / Faktor Penunjang (Tampil di Daftar Temuan & PTK)'}
             </label>
             <textarea
               rows={3}
               disabled={!isAuditor}
               value={akarMasalah}
               onChange={(e) => setAkarMasalah(e.target.value)}
-              placeholder="Ringkasan akar masalah atau faktor penunjang capaian..."
+              placeholder={
+                lang === 'EN'
+                  ? 'Summary of root causes or driving factors...'
+                  : 'Ringkasan akar masalah atau faktor penunjang capaian...'
+              }
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-xs text-slate-900 focus:border-blue-800 focus:outline-none disabled:bg-slate-100"
             />
           </div>
@@ -334,34 +378,44 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-200">
             <div className="sm:col-span-2">
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                PTK / RTL (Permintaan Tindakan Koreksi / Rencana Tindak Lanjut)
+                {lang === 'EN'
+                  ? 'CAR / RTL (Corrective Action Request / Follow-up Plan)'
+                  : 'PTK / RTL (Permintaan Tindakan Koreksi / Rencana Tindak Lanjut)'}
               </label>
               <textarea
                 rows={2}
                 disabled={!canEditPtkDraft}
                 value={ptkRtl}
                 onChange={(e) => setPtkRtl(e.target.value)}
-                placeholder="Rencana tindakan koreksi konkret yang disepakati..."
+                placeholder={
+                  lang === 'EN'
+                    ? 'Agreed concrete corrective action plan...'
+                    : 'Rencana tindakan koreksi konkret yang disepakati...'
+                }
                 className="w-full rounded-md border border-slate-300 px-3 py-2 text-xs text-slate-900 focus:border-blue-800 focus:outline-none disabled:bg-slate-100"
               />
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1">
-                PIC (Penanggung Jawab)
+                {lang === 'EN' ? 'PIC (Person In Charge)' : 'PIC (Penanggung Jawab)'}
               </label>
               <input
                 type="text"
                 disabled={!canEditPtkDraft}
                 value={pic}
                 onChange={(e) => setPic(e.target.value)}
-                placeholder="Contoh: Kaprodi & GJM Prodi"
+                placeholder={
+                  lang === 'EN'
+                    ? 'e.g. Head of Study Program & Quality Assurance Unit'
+                    : 'Contoh: Kaprodi & GJM Prodi'
+                }
                 className="w-full rounded-md border border-slate-300 px-3 py-2 text-xs text-slate-900 focus:border-blue-800 focus:outline-none disabled:bg-slate-100"
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1">
-                  Target Selesai PTK
+                  {lang === 'EN' ? 'Target CAR Due Date' : 'Target Selesai PTK'}
                 </label>
                 <input
                   type="date"
@@ -373,7 +427,7 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1">
-                  Jadwal Monev
+                  {lang === 'EN' ? 'Monev Schedule' : 'Jadwal Monev'}
                 </label>
                 <input
                   type="date"
@@ -392,14 +446,16 @@ export const PlorCaModal: React.FC<PlorCaModalProps> = ({
               onClick={onClose}
               className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
             >
-              {canSaveAny ? 'Batal' : 'Tutup'}
+              {canSaveAny
+                ? (lang === 'EN' ? 'Cancel' : 'Batal')
+                : (lang === 'EN' ? 'Close' : 'Tutup')}
             </button>
             {canSaveAny && (
               <button
                 type="submit"
                 className="rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition-colors"
               >
-                Simpan Perubahan
+                {lang === 'EN' ? 'Save Changes' : 'Simpan Perubahan'}
               </button>
             )}
           </div>

@@ -78,6 +78,17 @@ import {
 } from './utils/supabaseClient';
 import { exportAmiToExcel, exportInstrumentTemplate } from './utils/exportAmi';
 import { LoginScreen } from './components/auth/LoginScreen';
+import { LandingCard } from './components/auth/LandingCard';
+import {
+  Language,
+  getInitialLanguage,
+  getNavLabel,
+  getTabTitle,
+  setStoredLanguage,
+  t,
+  translateFaculty,
+  translateProgramName,
+} from './utils/i18n';
 import { TabDashboardPpepp } from './components/tabs/TabDashboardPpepp';
 import { TabIdentitasProdi } from './components/tabs/TabIdentitasProdi';
 import { TabInstrumenEvaluasi } from './components/tabs/TabInstrumenEvaluasi';
@@ -216,6 +227,16 @@ export default function App() {
   const [toast, setToast] = useState<string | null>(null);
   const [cloudStatus, setCloudStatus] = useState<CloudSyncStatus>('idle');
   const [roleOverride, setRoleOverride] = useState<string | null>(null);
+  const [lang, setLang] = useState<Language>(getInitialLanguage);
+  const [showLanding, setShowLanding] = useState<boolean>(true);
+
+  const handleToggleLang = useCallback(() => {
+    setLang((prev) => {
+      const next: Language = prev === 'ID' ? 'EN' : 'ID';
+      setStoredLanguage(next);
+      return next;
+    });
+  }, []);
 
   // Refs for debounced upserts & race-free realtime handlers
   const activeLoadUserIdRef = useRef<string | null>(null);
@@ -405,7 +426,11 @@ export default function App() {
         setCloudStatus('saved');
       } catch (err) {
         const msg = formatSupabaseError(err);
-        setAuthError(`Gagal memuat data Supabase: ${msg}`);
+        setAuthError(
+          lang === 'EN'
+            ? `Failed to load system data: ${msg}`
+            : `Gagal memuat data sistem: ${msg}`
+        );
         activeLoadUserIdRef.current = null;
       } finally {
         setLoadingWorkspace(false);
@@ -979,7 +1004,11 @@ export default function App() {
 
     if (!res.ok || !res.data) {
       setCloudStatus('error');
-      showToast(`Gagal menambahkan indikator ke Supabase: ${res.error ?? 'Unknown error'}`);
+      showToast(
+        lang === 'EN'
+          ? `Failed to add indicator: ${res.error ?? 'Unknown error'}`
+          : `Gagal menambahkan indikator ke database pusat: ${res.error ?? 'Unknown error'}`
+      );
       return;
     }
 
@@ -1444,8 +1473,8 @@ export default function App() {
             <Loader2 className="h-4 w-4 animate-spin text-amber-400" />
             <span>
               {checkingSession
-                ? 'Memeriksa sesi autentikasi Supabase...'
-                : 'Memuat data Program Studi, Indikator & Evaluasi...'}
+                ? (lang === 'EN' ? 'Verifying authentication session...' : 'Memeriksa sesi autentikasi...')
+                : (lang === 'EN' ? 'Loading Study Programs, Indicators & Evaluations...' : 'Memuat data Program Studi, Indikator & Evaluasi...')}
             </span>
           </div>
         </div>
@@ -1453,10 +1482,36 @@ export default function App() {
     );
   }
 
-  // Authentication Gate: Login Screen
+  // Authentication Gate: Login Screen & Landing Card
   if (!session || !userProfile || !permissions) {
+    if (showLanding) {
+      return (
+        <LandingCard
+          lang={lang}
+          onToggleLang={handleToggleLang}
+          onEnterApp={() => setShowLanding(false)}
+        />
+      );
+    }
     return (
-      <LoginScreen onLogin={handleSupabaseLogin} externalError={authError} />
+      <div className="relative min-h-screen">
+        <div className="absolute top-4 right-4 z-20">
+          <button
+            type="button"
+            onClick={() => setShowLanding(true)}
+            className="rounded-xl border border-slate-700 bg-slate-900/90 px-3 py-2 text-xs font-bold text-amber-400 hover:bg-slate-800 shadow-md"
+          >
+            ← {lang === 'ID' ? 'Kembali ke Sambutan' : 'Back to Landing'}
+          </button>
+        </div>
+        <LoginScreen
+          onLogin={handleSupabaseLogin}
+          externalError={authError}
+          lang={lang}
+          onToggleLang={handleToggleLang}
+          onBackToLanding={() => setShowLanding(true)}
+        />
+      </div>
     );
   }
 
@@ -1534,7 +1589,7 @@ export default function App() {
               type="text"
               value={sidebarSearch}
               onChange={(e) => setSidebarSearch(e.target.value)}
-              placeholder="Cari modul siklus..."
+              placeholder={t('sidebar.search', lang)}
               className="w-full rounded-md border border-slate-700 bg-slate-800/80 pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-400 focus:border-blue-500 focus:outline-none"
             />
           </div>
@@ -1542,7 +1597,7 @@ export default function App() {
 
         <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
           <div className="px-2 text-[11px] font-semibold tracking-wider text-amber-400 uppercase">
-            Modul Siklus PPEPP
+            {t('sidebar.title', lang)}
           </div>
 
           {/* 00. Dashboard PPEPP */}
@@ -1552,6 +1607,7 @@ export default function App() {
                 i.id === 'dashboard' &&
                 (sidebarSearch === '' ||
                   i.label.toLowerCase().includes(sidebarSearch.toLowerCase()) ||
+                  t('tab.' + i.id, lang).toLowerCase().includes(sidebarSearch.toLowerCase()) ||
                   i.num.includes(sidebarSearch))
             )
             .map((item) => {
@@ -1578,7 +1634,7 @@ export default function App() {
                       }`}
                     />
                     <span className="truncate">
-                      {item.num}. {item.label}
+                      {getNavLabel(item, lang)}
                     </span>
                   </span>
                 </button>
@@ -1586,24 +1642,25 @@ export default function App() {
             })}
 
           {[
-            { title: '1. Penetapan Standar', ids: ['identitas'] },
-            { title: '2. Pelaksanaan Standar', ids: ['instrumen'] },
+            { title: t('sidebar.penetapan', lang), ids: ['identitas'] },
+            { title: t('sidebar.pelaksanaan', lang), ids: ['instrumen'] },
             {
-              title: '3. Evaluasi Standar',
+              title: t('sidebar.evaluasi', lang),
               ids: ['rekap', 'laporan', 'temuan'],
             },
-            { title: '4. Pengendalian Standar', ids: ['ptk', 'monev'] },
+            { title: t('sidebar.pengendalian', lang), ids: ['ptk', 'monev'] },
             {
-              title: '5. Peningkatan Standar',
+              title: t('sidebar.peningkatan', lang),
               ids: ['perengkingan', 'laporan_spmi'],
             },
-            { title: 'Utilitas & Sistem', ids: ['panduan', 'manajemen'] },
+            { title: t('sidebar.utilitas', lang), ids: ['panduan', 'manajemen'] },
           ].map((sec) => {
             const itemsInSec = visibleNavItems.filter(
               (i) =>
                 sec.ids.includes(i.id) &&
                 (sidebarSearch === '' ||
                   i.label.toLowerCase().includes(sidebarSearch.toLowerCase()) ||
+                  t('tab.' + i.id, lang).toLowerCase().includes(sidebarSearch.toLowerCase()) ||
                   i.num.includes(sidebarSearch))
             );
             if (itemsInSec.length === 0) return null;
@@ -1644,7 +1701,7 @@ export default function App() {
                           }`}
                         />
                         <span className="truncate">
-                          {item.num}. {item.label}
+                          {getNavLabel(item, lang)}
                         </span>
                       </span>
                       {countBadge !== null && (
@@ -1663,7 +1720,7 @@ export default function App() {
         <div className="border-t border-slate-800 p-4 space-y-2.5">
           <div className="rounded-lg bg-slate-800/70 px-3.5 py-2.5">
             <div className="text-[11px] text-slate-400">
-              Skor Terbobot Saat Ini
+              {t('sidebar.currentScore', lang)}
             </div>
             <div className="mt-0.5 flex items-baseline justify-between gap-2">
               <span className="font-mono text-lg font-bold tabular-nums text-amber-400">
@@ -1683,7 +1740,7 @@ export default function App() {
             className="w-full min-h-[40px] flex items-center justify-center gap-2 rounded-lg border border-red-900/50 bg-red-950/50 px-3 py-2 text-xs font-semibold text-red-200 hover:bg-red-900/60 transition-colors"
           >
             <LogOut className="h-3.5 w-3.5" />
-            Keluar dari Sistem
+            {t('sidebar.logout', lang)}
           </button>
         </div>
       </aside>
@@ -1724,7 +1781,7 @@ export default function App() {
                   activeTab === navItem.id ? 'text-blue-900 font-semibold' : ''
                 }`}
               >
-                {navItem.label}
+                {getTabTitle(navItem.id, lang)}
               </button>
             ))}
           </nav>
@@ -1734,20 +1791,20 @@ export default function App() {
             {cloudStatus === 'saving' && (
               <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] font-semibold text-amber-800 whitespace-nowrap">
                 <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-600" />
-                <span>Menyimpan...</span>
+                <span>{t('sync.saving', lang)}</span>
               </span>
             )}
             {cloudStatus === 'saved' && (
               <span className="hidden md:inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[11px] font-semibold text-emerald-800 whitespace-nowrap">
                 <Cloud className="h-3.5 w-3.5 text-emerald-600" />
-                <span>Tersimpan di Cloud</span>
+                <span>{t('sync.saved', lang)}</span>
                 <Check className="h-3 w-3 text-emerald-600" />
               </span>
             )}
             {cloudStatus === 'error' && (
               <span className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-[11px] font-semibold text-red-800 whitespace-nowrap">
                 <CloudOff className="h-3.5 w-3.5 text-red-600" />
-                <span>Gagal Sinkron</span>
+                <span>{t('sync.error', lang)}</span>
               </span>
             )}
 
@@ -1755,28 +1812,36 @@ export default function App() {
             {isSuperAdminAccount ? (
               <div className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs shadow-xs">
                 <ShieldCheck className="h-3.5 w-3.5 text-blue-900 shrink-0" />
-                <span className="text-[11px] font-medium text-slate-500 hidden md:inline">Peran:</span>
+                <span className="text-[11px] font-medium text-slate-500 hidden md:inline">
+                  {lang === 'EN' ? 'Role:' : 'Peran:'}
+                </span>
                 <select
-                  aria-label="Pilih Peran RBAC"
+                  aria-label={lang === 'EN' ? 'Select User Role' : 'Pilih Peran Pengguna'}
                   value={roleOverride ?? effectiveUserProfile?.role ?? userProfile.role}
                   onChange={(e) => {
                     const nextRole = e.target.value;
                     setRoleOverride(nextRole);
                     const metaLabel =
                       nextRole === 'KAPRODI'
-                        ? 'Kaprodi (Auditee)'
+                        ? lang === 'EN' ? 'Study Program Head (Auditee)' : 'Kaprodi (Auditee)'
                         : nextRole === 'AUDITOR_AMI'
                         ? 'Auditor & Lead Auditor'
                         : nextRole === 'PIMPINAN'
-                        ? 'Pimpinan'
+                        ? lang === 'EN' ? 'Leadership' : 'Pimpinan'
                         : 'Admin & Superadmin';
-                    showToast(`Hak akses RBAC disesuaikan: ${metaLabel}`);
+                    showToast(
+                      lang === 'EN'
+                        ? `Role access adjusted: ${metaLabel}`
+                        : `Hak akses peran disesuaikan: ${metaLabel}`
+                    );
                   }}
                   className="bg-transparent font-bold text-xs text-slate-800 focus:outline-none cursor-pointer"
                 >
-                  <option value="KAPRODI">Kaprodi (Auditee)</option>
+                  <option value="KAPRODI">
+                    {lang === 'EN' ? 'Program Head (Auditee)' : 'Kaprodi (Auditee)'}
+                  </option>
                   <option value="AUDITOR_AMI">Auditor &amp; Lead Auditor</option>
-                  <option value="PIMPINAN">Pimpinan</option>
+                  <option value="PIMPINAN">{lang === 'EN' ? 'Leadership' : 'Pimpinan'}</option>
                   <option value="SUPER_ADMIN">Admin &amp; Superadmin</option>
                 </select>
               </div>
@@ -1794,7 +1859,9 @@ export default function App() {
             {permissions.isExternalAssessor && (
               <span className="inline-flex items-center gap-1.5 rounded-lg border border-purple-300 bg-purple-50 px-2.5 py-1.5 text-[11px] font-bold text-purple-900 whitespace-nowrap">
                 <Eye className="h-3.5 w-3.5 text-purple-700 shrink-0" />
-                Mode Asesor Eksternal - Read Only
+                {lang === 'EN'
+                  ? 'External Assessor Mode - Read Only'
+                  : 'Mode Asesor Eksternal - Read Only'}
               </span>
             )}
 
@@ -1809,16 +1876,26 @@ export default function App() {
               </button>
             )}
 
+            {/* Language Switcher Button */}
+            <button
+              type="button"
+              onClick={handleToggleLang}
+              className="min-h-[38px] inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 sm:px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-100 transition-colors whitespace-nowrap shrink-0 shadow-xs"
+              title={lang === 'ID' ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
+            >
+              <span>{lang === 'ID' ? '🇬🇧 English' : '🇮🇩 Indonesia'}</span>
+            </button>
+
             <button
               type="button"
               onClick={() => {
                 void handleLogout();
               }}
-              title="Keluar dari akun"
+              title={lang === 'EN' ? 'Sign out from account' : 'Keluar dari akun'}
               className="min-h-[38px] inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors whitespace-nowrap shrink-0"
             >
               <LogOut className="h-3.5 w-3.5 text-slate-600" />
-              <span className="hidden sm:inline">Keluar</span>
+              <span className="hidden sm:inline">{lang === 'EN' ? 'Sign Out' : 'Keluar'}</span>
             </button>
           </div>
         </header>
@@ -1826,7 +1903,7 @@ export default function App() {
         {/* Workspace Toolbar: Data Scoping Controls */}
         <div className="no-print border-b border-slate-200 bg-slate-100/70 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="font-medium text-slate-500">Fakultas:</span>
+            <span className="font-medium text-slate-500">{t('toolbar.faculty', lang)}</span>
             <select
               aria-label="Filter Fakultas"
               disabled={permissions.lockFakultas}
@@ -1855,17 +1932,19 @@ export default function App() {
             >
               {!permissions.lockFakultas && (
                 <option value="all">
-                  Semua ({scopedPrograms.length} Prodi)
+                  {lang === 'EN'
+                    ? `All (${scopedPrograms.length} Programs)`
+                    : `Semua (${scopedPrograms.length} Prodi)`}
                 </option>
               )}
               {scopedFacultyNames.map((fac) => (
                 <option key={fac} value={fac}>
-                  {fac}
+                  {translateFaculty(fac, lang)}
                 </option>
               ))}
             </select>
 
-            <span className="font-medium text-slate-500">Jenis Prodi:</span>
+            <span className="font-medium text-slate-500">{t('toolbar.programType', lang)}</span>
             <select
               aria-label="Filter Jenis Program Studi"
               disabled={permissions.lockProdi}
@@ -1902,16 +1981,16 @@ export default function App() {
               }}
               className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 focus:border-blue-800 focus:outline-none disabled:bg-slate-200/70 disabled:text-slate-600"
             >
-              <option value="all">Semua Jenis</option>
+              <option value="all">{t('toolbar.allTypes', lang)}</option>
               <option value="Kependidikan">
-                Kependidikan ({indicatorsByJenis.Kependidikan.length} Ind.)
+                {t('toolbar.kependidikan', lang)} ({indicatorsByJenis.Kependidikan.length} Ind.)
               </option>
               <option value="Non-Kependidikan">
-                Non-Kependidikan ({indicatorsByJenis['Non-Kependidikan'].length} Ind.)
+                {t('toolbar.nonKependidikan', lang)} ({indicatorsByJenis['Non-Kependidikan'].length} Ind.)
               </option>
             </select>
 
-            <span className="font-medium text-slate-500">Prodi:</span>
+            <span className="font-medium text-slate-500">{t('toolbar.studyProgram', lang)}</span>
             <select
               aria-label="Pilih Program Studi"
               disabled={permissions.lockProdi}
@@ -1922,7 +2001,7 @@ export default function App() {
               {(toolbarPrograms.length > 0 ? toolbarPrograms : scopedPrograms).map(
                 (p) => (
                   <option key={p.id} value={p.id}>
-                    {p.kode_ps} — {p.nama_prodi}
+                    {p.kode_ps} — {translateProgramName(p.nama_prodi, lang)}
                   </option>
                 )
               )}
@@ -1930,11 +2009,11 @@ export default function App() {
 
             {(permissions.lockFakultas || permissions.lockProdi) && (
               <span
-                title="Cakupan unit dikunci oleh peran aktif"
+                title={lang === 'EN' ? 'Unit scope is locked by active role' : 'Cakupan unit dikunci oleh peran aktif'}
                 className="inline-flex items-center gap-1 rounded bg-slate-200/80 px-2 py-1 text-[11px] font-medium text-slate-700"
               >
                 <Lock className="h-3 w-3" />
-                Terkunci
+                {t('toolbar.locked', lang)}
               </span>
             )}
 
@@ -1945,13 +2024,13 @@ export default function App() {
                 className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
               >
                 <Plus className="h-3.5 w-3.5" />
-                Prodi Baru
+                {t('toolbar.newProdi', lang)}
               </button>
             )}
 
             <span className="text-slate-300 hidden sm:inline">|</span>
 
-            <span className="font-medium text-slate-500">Siklus:</span>
+            <span className="font-medium text-slate-500">{t('toolbar.cycle', lang)}</span>
             <select
               aria-label="Pilih Siklus PPEPP"
               disabled={scopedCycles.length <= 1}
@@ -2006,17 +2085,17 @@ export default function App() {
               <div className="no-print mb-4 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-semibold text-slate-800">
-                    {activeNavMeta?.num}. {activeNavMeta?.label}
+                    {activeNavMeta ? getNavLabel(activeNavMeta, lang) : ''}
                   </span>
                   <span aria-hidden="true">·</span>
-                  <span>{activeProgram.nama_prodi}</span>
+                  <span>{translateProgramName(activeProgram.nama_prodi, lang)}</span>
                   <span aria-hidden="true">·</span>
-                  <span>Akreditasi {activeProgram.peringkat_akreditasi}</span>
+                  <span>{lang === 'EN' ? 'Accreditation' : 'Akreditasi'} {activeProgram.peringkat_akreditasi}</span>
                   <span aria-hidden="true">·</span>
-                  <span>Kaprodi: {activeProgram.kaprodi_nama || '-'}</span>
+                  <span>{lang === 'EN' ? 'Program Head:' : 'Kaprodi:'} {activeProgram.kaprodi_nama || '-'}</span>
                 </div>
                 <span className="font-mono tabular-nums">
-                  {scopedPrograms.length} / {programs.length} Program Studi dalam Cakupan
+                  {scopedPrograms.length} / {programs.length} {lang === 'EN' ? 'Study Programs in Scope' : 'Program Studi dalam Cakupan'}
                 </span>
               </div>
 
@@ -2035,6 +2114,7 @@ export default function App() {
                   overall={overallRecap}
                   allowedTabs={permissions.allowedTabs}
                   canExport={permissions.canExportReports}
+                  lang={lang}
                   onNavigateTab={(tab, stdId) => {
                     if (!permissions.allowedTabs.includes(tab)) return;
                     if (stdId !== undefined) {
@@ -2054,8 +2134,13 @@ export default function App() {
                   program={activeProgram}
                   role={permissions.legacyMode}
                   canEdit={permissions.canEditIdentitas}
-                  readOnlyLabel={`Hanya Baca (${permissions.roleDisplayName})`}
+                  readOnlyLabel={
+                    lang === 'EN'
+                      ? `Read-Only (${permissions.roleDisplayName})`
+                      : `Hanya Baca (${permissions.roleDisplayName})`
+                  }
                   onChange={handleUpdateProgram}
+                  lang={lang}
                 />
               )}
 
@@ -2082,6 +2167,7 @@ export default function App() {
                   onUpdateEvaluation={handleUpdateEvaluation}
                   onDownloadTemplate={handleDownloadInstrumentTemplate}
                   canExport={permissions.canExportReports}
+                  lang={lang}
                   onAddIndicator={(ind) => {
                     void handleAddIndicator(ind);
                   }}
@@ -2103,6 +2189,7 @@ export default function App() {
                   recaps={standardRecaps}
                   overall={overallRecap}
                   canInspectInstrumen={permissions.allowedTabs.includes('instrumen')}
+                  lang={lang}
                   onNavigateTab={(tab) => setActiveTab(tab)}
                   onInspectStandard={(stdId) => {
                     if (!permissions.allowedTabs.includes('instrumen')) return;
@@ -2121,6 +2208,7 @@ export default function App() {
                   onPrintPdf={() => setPrintPreviewMode('laporan_ami')}
                   onExportExcel={handleExportExcel}
                   canExport={permissions.canExportReports}
+                  lang={lang}
                 />
               )}
 
@@ -2131,6 +2219,7 @@ export default function App() {
                   evaluations={activeEvaluations}
                   canEditPlorCa={permissions.canEditPlorCa}
                   allowedStandardIds={permissions.allowedStandardIds}
+                  lang={lang}
                   onOpenPlorCa={setPlorIndicator}
                 />
               )}
@@ -2149,6 +2238,7 @@ export default function App() {
                   onUpdateEvaluation={handleUpdateEvaluation}
                   onPrint={() => setPrintPreviewMode('ptk_rtl')}
                   canExport={permissions.canExportReports}
+                  lang={lang}
                 />
               )}
 
@@ -2161,6 +2251,7 @@ export default function App() {
                   canVerifyClosed={permissions.canVerifyMonevClosed}
                   allowedStandardIds={permissions.allowedStandardIds}
                   onUpdateEvaluation={handleUpdateEvaluation}
+                  lang={lang}
                 />
               )}
 
@@ -2200,6 +2291,7 @@ export default function App() {
                   indicatorsByJenis={indicatorsByJenis}
                   evaluationsByContext={evaluationsByContext}
                   canExport={permissions.canExportReports}
+                  lang={lang}
                   onSelectCycle={(cycleId) => setActiveCycleId(cycleId)}
                   onSelectProgram={(programId) => {
                     if (!permissions.lockFakultas) {
@@ -2235,6 +2327,7 @@ export default function App() {
                   canViewUniversityReport={permissions.allowedProdiIds === 'all'}
                   roleDisplayName={permissions.roleDisplayName}
                   canExport={permissions.canExportReports}
+                  lang={lang}
                 />
               )}
 
@@ -2297,6 +2390,7 @@ export default function App() {
             target_1_yr: target,
           })
         }
+        lang={lang}
       />
 
       <PlorCaModal
@@ -2309,8 +2403,13 @@ export default function App() {
         onClose={() => setPlorIndicator(null)}
         onSave={(indId, updates) => {
           handleUpdateEvaluation(indId, updates);
-          showToast('Analisis PLOR+CA & PTK/RTL berhasil diperbarui.');
+          showToast(
+            lang === 'EN'
+              ? 'PLOR+CA & Action Plan updated successfully.'
+              : 'Analisis PLOR+CA & PTK/RTL berhasil diperbarui.'
+          );
         }}
+        lang={lang}
       />
 
       <NewProdiModal
@@ -2333,6 +2432,7 @@ export default function App() {
           indicators={activeIndicators}
           evaluations={activeEvaluations}
           ppeppStats={ppeppSummaryStats}
+          lang={lang}
         />
       )}
 

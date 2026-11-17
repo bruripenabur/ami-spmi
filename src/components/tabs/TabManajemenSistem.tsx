@@ -157,10 +157,10 @@ export const TabManajemenSistem: React.FC<TabManajemenSistemProps> = ({
       <div className="rounded-xl border border-slate-200 bg-white p-5 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="text-base sm:text-lg font-bold text-slate-900">
-            Manajemen Pengguna, Hak Akses RBAC &amp; Master Data
+            Manajemen Pengguna, Hak Akses &amp; Master Data
           </h2>
           <p className="text-xs text-slate-600 mt-0.5">
-            Kelola profil pengguna Supabase, siklus PPEPP, serta Master Data Program Studi Universitas Pattimura.
+            Kelola profil pengguna, siklus PPEPP, serta Master Data Program Studi Universitas Pattimura.
           </p>
         </div>
 
@@ -176,7 +176,7 @@ export const TabManajemenSistem: React.FC<TabManajemenSistemProps> = ({
               }`}
             >
               <Users className="h-3.5 w-3.5" />
-              Pengguna &amp; RBAC ({ssoProfiles.length})
+              Pengguna &amp; Peran ({ssoProfiles.length})
             </button>
           )}
           {canManageCycles && (
@@ -256,7 +256,7 @@ export const TabManajemenSistem: React.FC<TabManajemenSistemProps> = ({
                 <tr>
                   <th className="px-4 py-3 font-semibold">Nama Lengkap &amp; Jabatan</th>
                   <th className="px-4 py-3 font-semibold">NIP / Email</th>
-                  <th className="px-4 py-3 font-semibold">Peran RBAC</th>
+                  <th className="px-4 py-3 font-semibold">Peran Pengguna</th>
                   <th className="px-4 py-3 font-semibold">Unit Kode / Prodi</th>
                   <th className="px-4 py-3 font-semibold w-32 text-right">Aksi</th>
                 </tr>
@@ -330,7 +330,7 @@ export const TabManajemenSistem: React.FC<TabManajemenSistemProps> = ({
                             className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 hover:border-blue-800 hover:text-blue-900"
                           >
                             <Edit3 className="h-3 w-3" />
-                            Atur RBAC
+                            Atur Peran
                           </button>
                         </td>
                       </tr>
@@ -629,10 +629,10 @@ export const TabManajemenSistem: React.FC<TabManajemenSistemProps> = ({
                 <Shield className="h-5 w-5 text-amber-400" />
                 <div>
                   <h3 className="text-sm font-bold">
-                    Atur Profil &amp; Peran RBAC Pengguna
+                    Atur Profil &amp; Peran Pengguna
                   </h3>
                   <p className="text-[11px] text-slate-300">
-                    Pembaruan tersimpan langsung ke tabel sso_user_profiles Supabase.
+                    Pembaruan tersimpan langsung ke database akun resmi.
                   </p>
                 </div>
               </div>
@@ -788,7 +788,7 @@ export const TabManajemenSistem: React.FC<TabManajemenSistemProps> = ({
                   className="min-h-[42px] inline-flex items-center gap-1.5 rounded-xl bg-[#1D4ED8] px-5 py-2 text-xs font-bold text-white hover:bg-[#1E40AF] disabled:opacity-70"
                 >
                   <CheckCircle2 className="h-4 w-4" />
-                  {savingProfile ? 'Menyimpan...' : 'Simpan ke Supabase'}
+                  {savingProfile ? 'Menyimpan...' : 'Simpan Perubahan'}
                 </button>
               </div>
             </form>

@@ -14,6 +14,12 @@ import {
   getKategoriTemuan,
   getPtkWorkflowBadgeClasses,
 } from '../../utils/amiCalculations';
+import {
+  Language,
+  translateFaculty,
+  translateKategori,
+  translateProgramName,
+} from '../../utils/i18n';
 
 interface TabFormulirPtkRtlProps {
   program: StudyProgramIdentity;
@@ -31,6 +37,7 @@ interface TabFormulirPtkRtlProps {
   ) => void;
   onPrint: () => void;
   canExport?: boolean;
+  lang?: Language;
 }
 
 export const TabFormulirPtkRtl: React.FC<TabFormulirPtkRtlProps> = ({
@@ -46,6 +53,7 @@ export const TabFormulirPtkRtl: React.FC<TabFormulirPtkRtlProps> = ({
   onUpdateEvaluation,
   onPrint,
   canExport = false,
+  lang = 'ID',
 }) => {
   const isAuditor = canEditDates !== undefined ? canEditDates : role === 'auditor';
 

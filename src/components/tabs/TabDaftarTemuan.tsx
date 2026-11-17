@@ -12,6 +12,11 @@ import {
   getKategoriBadgeClasses,
   getKategoriTemuan,
 } from '../../utils/amiCalculations';
+import {
+  Language,
+  translateKategori,
+  translateStandardName,
+} from '../../utils/i18n';
 
 interface TabDaftarTemuanProps {
   standards: AmiStandard[];
@@ -19,6 +24,7 @@ interface TabDaftarTemuanProps {
   evaluations: Record<string, AmiEvaluation>;
   canEditPlorCa?: boolean;
   allowedStandardIds?: number[] | 'all';
+  lang?: Language;
   onOpenPlorCa: (indicator: AmiIndicator) => void;
 }
 
@@ -38,6 +44,7 @@ export const TabDaftarTemuan: React.FC<TabDaftarTemuanProps> = ({
   evaluations,
   canEditPlorCa = true,
   allowedStandardIds = 'all',
+  lang = 'ID',
   onOpenPlorCa,
 }) => {
   const [filter, setFilter] = useState<FindingFilter>('Semua Temuan');
@@ -86,10 +93,14 @@ export const TabDaftarTemuan: React.FC<TabDaftarTemuanProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-bold text-slate-900">
-              Daftar Temuan AMI (Ketidaksesuaian / KTS, Observasi & Best Practice)
+              {lang === 'EN'
+                ? 'AMI Findings List (Non-Conformities / KTS, Observation & Best Practice)'
+                : 'Daftar Temuan AMI (Ketidaksesuaian / KTS, Observasi & Best Practice)'}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Dihimpun otomatis dari Instrumen Evaluasi (menampilkan seluruh indikator selain kategori Sesuai / Baik).
+              {lang === 'EN'
+                ? 'Compiled automatically from the Evaluation Instrument (displaying all indicators except Achieved / Good).'
+                : 'Dihimpun otomatis dari Instrumen Evaluasi (menampilkan seluruh indikator selain kategori Sesuai / Baik).'}
             </p>
           </div>
           <div className="relative">
@@ -98,7 +109,11 @@ export const TabDaftarTemuan: React.FC<TabDaftarTemuanProps> = ({
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari temuan atau akar masalah..."
+              placeholder={
+                lang === 'EN'
+                  ? 'Search findings or root cause...'
+                  : 'Cari temuan atau akar masalah...'
+              }
               className="w-64 rounded-lg border border-slate-300 bg-white pl-8 pr-3 py-1.5 text-xs text-slate-900 focus:border-blue-800 focus:outline-none"
             />
           </div>
@@ -111,6 +126,12 @@ export const TabDaftarTemuan: React.FC<TabDaftarTemuanProps> = ({
               f === 'Semua Temuan'
                 ? allFindings.length
                 : allFindings.filter((x) => x.kategori === f).length;
+            const label =
+              f === 'Semua Temuan'
+                ? lang === 'EN'
+                  ? 'All Findings'
+                  : 'Semua Temuan'
+                : translateKategori(f, lang);
             return (
               <button
                 key={f}
@@ -122,7 +143,7 @@ export const TabDaftarTemuan: React.FC<TabDaftarTemuanProps> = ({
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                {f} ({count})
+                {label} ({count})
               </button>
             );
           })}
@@ -132,7 +153,9 @@ export const TabDaftarTemuan: React.FC<TabDaftarTemuanProps> = ({
       <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
         {filtered.length === 0 ? (
           <div className="p-10 text-center text-sm text-slate-600">
-            Tidak ada temuan pada kategori ini.
+            {lang === 'EN'
+              ? 'No findings in this category.'
+              : 'Tidak ada temuan pada kategori ini.'}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -140,16 +163,28 @@ export const TabDaftarTemuan: React.FC<TabDaftarTemuanProps> = ({
               <thead className="bg-slate-100 text-slate-700 border-b border-slate-200">
                 <tr>
                   <th className="px-3 py-3 font-semibold w-12 text-center">No</th>
-                  <th className="px-3 py-3 font-semibold w-44">Standar</th>
-                  <th className="px-3 py-3 font-semibold w-64">Uraian Standar</th>
+                  <th className="px-3 py-3 font-semibold w-44">
+                    {lang === 'EN' ? 'Standard' : 'Standar'}
+                  </th>
+                  <th className="px-3 py-3 font-semibold w-64">
+                    {lang === 'EN' ? 'Standard Description' : 'Uraian Standar'}
+                  </th>
                   <th className="px-3 py-3 font-semibold w-80">
-                    Temuan Audit (Kondisi Saat Ini & Bukti)
+                    {lang === 'EN'
+                      ? 'Audit Findings (Current State & Evidence)'
+                      : 'Temuan Audit (Kondisi Saat Ini & Bukti)'}
                   </th>
-                  <th className="px-3 py-3 font-semibold w-32">Kategori Temuan</th>
+                  <th className="px-3 py-3 font-semibold w-32">
+                    {lang === 'EN' ? 'Findings Category' : 'Kategori Temuan'}
+                  </th>
                   <th className="px-3 py-3 font-semibold">
-                    Akar Masalah / Penunjang (PLOR+CA)
+                    {lang === 'EN'
+                      ? 'Root Cause / Supporting (PLOR+CA)'
+                      : 'Akar Masalah / Penunjang (PLOR+CA)'}
                   </th>
-                  <th className="px-3 py-3 font-semibold w-24 text-right">Aksi</th>
+                  <th className="px-3 py-3 font-semibold w-24 text-right">
+                    {lang === 'EN' ? 'Action' : 'Aksi'}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
@@ -167,7 +202,7 @@ export const TabDaftarTemuan: React.FC<TabDaftarTemuanProps> = ({
                       </td>
                       <td className="px-3 py-3 font-medium text-slate-900">
                         {item.standard
-                          ? `${item.standard.id}. ${item.standard.nama}`
+                          ? `${item.standard.id}. ${translateStandardName(item.standard.nama, lang)}`
                           : item.indicator.standard_id}
                       </td>
                       <td className="px-3 py-3 text-slate-800">
@@ -180,7 +215,9 @@ export const TabDaftarTemuan: React.FC<TabDaftarTemuanProps> = ({
                         <div>
                           <span className="font-mono font-semibold text-slate-900">
                             {item.evaluation.nilai_capaian !== null
-                              ? `Skor ${item.evaluation.nilai_capaian}:`
+                              ? `${lang === 'EN' ? 'Score' : 'Skor'} ${item.evaluation.nilai_capaian}:`
+                              : lang === 'EN'
+                              ? 'Not Evaluated:'
                               : 'Belum Dinilai:'}
                           </span>{' '}
                           {item.evaluation.nilai_capaian !== null
@@ -197,7 +234,7 @@ export const TabDaftarTemuan: React.FC<TabDaftarTemuanProps> = ({
                             className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-blue-800 hover:underline"
                           >
                             <ExternalLink className="h-3 w-3" />
-                            Lihat Bukti Dokumen
+                            {lang === 'EN' ? 'View Evidence Document' : 'Lihat Bukti Dokumen'}
                           </a>
                         )}
                       </td>
@@ -207,7 +244,7 @@ export const TabDaftarTemuan: React.FC<TabDaftarTemuanProps> = ({
                             item.kategori
                           )}`}
                         >
-                          {item.kategori}
+                          {translateKategori(item.kategori, lang)}
                         </span>
                       </td>
                       <td className="px-3 py-3 text-slate-700 leading-relaxed space-y-1">
@@ -221,7 +258,9 @@ export const TabDaftarTemuan: React.FC<TabDaftarTemuanProps> = ({
                         )}
                         {!item.evaluation.akar_masalah && !plorNarrative && (
                           <span className="italic text-slate-400">
-                            Belum ada catatan akar masalah / PLOR+CA.
+                            {lang === 'EN'
+                              ? 'No root cause notes / PLOR+CA yet.'
+                              : 'Belum ada catatan akar masalah / PLOR+CA.'}
                           </span>
                         )}
                       </td>
@@ -232,7 +271,11 @@ export const TabDaftarTemuan: React.FC<TabDaftarTemuanProps> = ({
                           className="inline-flex items-center gap-1 rounded border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50"
                         >
                           <ClipboardEdit className="h-3 w-3" />
-                          {canEditPlorCa ? 'PLOR+CA' : 'Lihat PLOR+CA'}
+                          {canEditPlorCa
+                            ? 'PLOR+CA'
+                            : lang === 'EN'
+                            ? 'View PLOR+CA'
+                            : 'Lihat PLOR+CA'}
                         </button>
                       </td>
                     </tr>

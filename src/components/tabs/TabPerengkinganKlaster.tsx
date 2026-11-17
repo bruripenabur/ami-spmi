@@ -48,6 +48,12 @@ import {
   exportRankingToExcel,
   exportRankingToPdf,
 } from '../../utils/exportAmi';
+import {
+  Language,
+  translateFaculty,
+  translateProgramName,
+  t,
+} from '../../utils/i18n';
 
 interface TabPerengkinganKlasterProps {
   programs: StudyProgramIdentity[];
@@ -59,6 +65,7 @@ interface TabPerengkinganKlasterProps {
   indicatorsByJenis?: Record<JenisProdi, AmiIndicator[]>;
   evaluationsByContext: Record<string, Record<string, AmiEvaluation>>;
   canExport?: boolean;
+  lang?: Language;
   onSelectCycle: (cycleId: string) => void;
   onSelectProgram: (programId: string) => void;
 }
@@ -127,9 +134,27 @@ export const TabPerengkinganKlaster: React.FC<TabPerengkinganKlasterProps> = ({
   indicatorsByJenis,
   evaluationsByContext,
   canExport = true,
+  lang = 'ID',
   onSelectCycle,
   onSelectProgram,
 }) => {
+  const getClusterLabel = (c: PpeppCluster): string => {
+    if (lang === 'EN') {
+      switch (c) {
+        case 'Unggul': return 'Superior Cluster';
+        case 'Stabil': return 'Stable Cluster';
+        case 'Menurun': return 'Declining Cluster';
+        case 'Pembinaan': return 'Coaching Cluster';
+      }
+    }
+    switch (c) {
+      case 'Unggul': return 'Klaster Unggul';
+      case 'Stabil': return 'Klaster Stabil';
+      case 'Menurun': return 'Klaster Menurun';
+      case 'Pembinaan': return 'Klaster Pembinaan';
+    }
+  };
+
   const [tier, setTier] = useState<RankingTier>('all');
   const [clusterFilter, setClusterFilter] = useState<'all' | PpeppCluster>('all');
   const [facultyFilter, setFacultyFilter] = useState<string>('all');
@@ -612,11 +637,13 @@ export const TabPerengkinganKlaster: React.FC<TabPerengkinganKlasterProps> = ({
               }
               className="min-h-[36px] rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 focus:border-blue-800 focus:outline-none"
             >
-              <option value="all">Semua Klaster (4)</option>
-              <option value="Unggul">Klaster Unggul</option>
-              <option value="Stabil">Klaster Stabil</option>
-              <option value="Menurun">Klaster Menurun</option>
-              <option value="Pembinaan">Klaster Pembinaan</option>
+              <option value="all">
+                {lang === 'EN' ? 'All Clusters (4)' : 'Semua Klaster (4)'}
+              </option>
+              <option value="Unggul">{getClusterLabel('Unggul')}</option>
+              <option value="Stabil">{getClusterLabel('Stabil')}</option>
+              <option value="Menurun">{getClusterLabel('Menurun')}</option>
+              <option value="Pembinaan">{getClusterLabel('Pembinaan')}</option>
             </select>
 
             <select
@@ -625,10 +652,14 @@ export const TabPerengkinganKlaster: React.FC<TabPerengkinganKlasterProps> = ({
               onChange={(e) => setFacultyFilter(e.target.value)}
               className="min-h-[36px] rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 focus:border-blue-800 focus:outline-none max-w-[220px]"
             >
-              <option value="all">Semua Fakultas ({faculties.length})</option>
+              <option value="all">
+                {lang === 'EN'
+                  ? `All Faculties (${faculties.length})`
+                  : `Semua Fakultas (${faculties.length})`}
+              </option>
               {faculties.map((f) => (
                 <option key={f} value={f}>
-                  {f}
+                  {translateFaculty(f, lang)}
                 </option>
               ))}
             </select>
@@ -639,7 +670,11 @@ export const TabPerengkinganKlaster: React.FC<TabPerengkinganKlasterProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari kode PS atau nama prodi..."
+                placeholder={
+                  lang === 'EN'
+                    ? 'Search program code or name...'
+                    : 'Cari kode PS atau nama prodi...'
+                }
                 className="min-h-[36px] w-full rounded-lg border border-slate-300 bg-white pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-800 focus:outline-none"
               />
             </div>
@@ -827,14 +862,30 @@ export const TabPerengkinganKlaster: React.FC<TabPerengkinganKlasterProps> = ({
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold text-slate-600">
                   <th className="px-3.5 py-3 w-16 text-center">Rank</th>
-                  <th className="px-3.5 py-3">Program Studi &amp; Fakultas</th>
-                  <th className="px-3 py-3 w-24 text-right">Skor Awal</th>
-                  <th className="px-3 py-3 w-52">Penalti &amp; Bonus Mutu</th>
-                  <th className="px-3 py-3 w-32 text-right">Indeks Kualitas</th>
-                  <th className="px-3 py-3 w-24 text-right">Indeks PPEPP</th>
-                  <th className="px-3 py-3 w-24 text-right">Tren YoY</th>
-                  <th className="px-3 py-3 min-w-[230px]">Klaster &amp; Analisis Mutu</th>
-                  <th className="px-3.5 py-3 w-28 text-right">Aksi</th>
+                  <th className="px-3.5 py-3">
+                    {lang === 'EN' ? 'Study Program & Faculty' : 'Program Studi & Fakultas'}
+                  </th>
+                  <th className="px-3 py-3 w-24 text-right">
+                    {lang === 'EN' ? 'Initial Score' : 'Skor Awal'}
+                  </th>
+                  <th className="px-3 py-3 w-52">
+                    {lang === 'EN' ? 'Quality Penalties & Bonus' : 'Penalti & Bonus Mutu'}
+                  </th>
+                  <th className="px-3 py-3 w-32 text-right">
+                    {lang === 'EN' ? 'Quality Index' : 'Indeks Kualitas'}
+                  </th>
+                  <th className="px-3 py-3 w-24 text-right">
+                    {lang === 'EN' ? 'PPEPP Index' : 'Indeks PPEPP'}
+                  </th>
+                  <th className="px-3 py-3 w-24 text-right">
+                    {lang === 'EN' ? 'YoY Trend' : 'Tren YoY'}
+                  </th>
+                  <th className="px-3 py-3 min-w-[230px]">
+                    {lang === 'EN' ? 'Cluster & Quality Analysis' : 'Klaster & Analisis Mutu'}
+                  </th>
+                  <th className="px-3.5 py-3 w-28 text-right">
+                    {lang === 'EN' ? 'Action' : 'Aksi'}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -866,12 +917,12 @@ export const TabPerengkinganKlaster: React.FC<TabPerengkinganKlasterProps> = ({
 
                       <td className="px-3.5 py-3">
                         <div className="font-semibold text-slate-900">
-                          {entry.program.nama_prodi}
+                          {translateProgramName(entry.program.nama_prodi, lang)}
                         </div>
                         <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
                           <span className="font-mono">{entry.program.kode_ps}</span>
                           <span aria-hidden="true">·</span>
-                          <span>{entry.program.fakultas}</span>
+                          <span>{translateFaculty(entry.program.fakultas, lang)}</span>
                           <span aria-hidden="true">·</span>
                           <span className="text-slate-600 font-medium">
                             {entry.program.peringkat_akreditasi}
@@ -970,7 +1021,7 @@ export const TabPerengkinganKlaster: React.FC<TabPerengkinganKlasterProps> = ({
                             )}`}
                           >
                             {renderClusterIcon(entry.cluster)}
-                            {entry.cluster}
+                            {getClusterLabel(entry.cluster)}
                           </span>
                           <span className="text-[11px] leading-snug text-slate-600">
                             {entry.clusterReason}
@@ -988,7 +1039,13 @@ export const TabPerengkinganKlaster: React.FC<TabPerengkinganKlasterProps> = ({
                               : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-100'
                           }`}
                         >
-                          {isActiveProdi ? 'Prodi Aktif' : 'Pilih Prodi'}
+                          {isActiveProdi
+                            ? lang === 'EN'
+                              ? 'Active Program'
+                              : 'Prodi Aktif'
+                            : lang === 'EN'
+                            ? 'Select Program'
+                            : 'Pilih Prodi'}
                           {!isActiveProdi && (
                             <ArrowUpRight className="h-3 w-3 shrink-0" />
                           )}

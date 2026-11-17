@@ -191,7 +191,10 @@ function buildFallbackProgramIdentity(row: PpeppProdiRow): StudyProgramIdentity 
   const akred = normalizeAkreditasi(row.akreditasi);
   const kode = String(row.kode_prodi ?? '').trim();
   const nama = String(row.nama_prodi ?? '').trim();
-  const fakultas = String(row.fakultas ?? '').trim();
+  const rawFakultas = String(row.fakultas ?? '').trim();
+
+  const isPasca = nama.startsWith('S2 ') || nama.startsWith('S3 ');
+  const fakultas = isPasca ? 'Pascasarjana' : rawFakultas;
 
   return {
     id: kode,
@@ -271,11 +274,14 @@ export function mapProdiRowToIdentity(
   );
 
   if (baseMatch) {
+    const isPasca =
+      baseMatch.nama_prodi.startsWith('S2 ') ||
+      baseMatch.nama_prodi.startsWith('S3 ');
     return {
       ...baseMatch,
       kode_ps: kode,
       nama_prodi: String(row.nama_prodi || baseMatch.nama_prodi),
-      fakultas: String(row.fakultas || baseMatch.fakultas),
+      fakultas: isPasca ? 'Pascasarjana' : String(row.fakultas || baseMatch.fakultas),
       jenis_prodi: row.jenis_prodi
         ? normalizeJenisProdi(row.jenis_prodi)
         : baseMatch.jenis_prodi,

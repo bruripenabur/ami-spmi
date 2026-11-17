@@ -6,6 +6,11 @@ import {
   StudyProgramIdentity,
   UserRole,
 } from '../../types/ami';
+import {
+  Language,
+  translateFaculty,
+  translateProgramName,
+} from '../../utils/i18n';
 
 interface TabIdentitasProdiProps {
   program: StudyProgramIdentity;
@@ -13,6 +18,7 @@ interface TabIdentitasProdiProps {
   canEdit?: boolean;
   readOnlyLabel?: string;
   onChange: (updated: StudyProgramIdentity) => void;
+  lang?: Language;
 }
 
 export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
@@ -21,6 +27,7 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
   canEdit,
   readOnlyLabel,
   onChange,
+  lang = 'ID',
 }) => {
   const isReadOnly = canEdit !== undefined ? !canEdit : role === 'auditor';
 
@@ -48,17 +55,17 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
           />
           <div>
             <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
-              <span>Kode PT {program.kode_pt}</span>
+              <span>{lang === 'EN' ? 'HEI Code' : 'Kode PT'} {program.kode_pt}</span>
               <span aria-hidden="true">·</span>
-              <span>Kode PS {program.kode_ps}</span>
+              <span>{lang === 'EN' ? 'Program Code' : 'Kode PS'} {program.kode_ps}</span>
               <span aria-hidden="true">·</span>
-              <span>Siklus PPEPP {program.tahun_siklus_ppepp}</span>
+              <span>{lang === 'EN' ? 'PPEPP Cycle' : 'Siklus PPEPP'} {program.tahun_siklus_ppepp}</span>
             </div>
             <h2 className="mt-1 text-xl font-bold text-slate-900">
-              Identitas Program Studi ({program.jenis_prodi})
+              {lang === 'EN' ? 'Study Program Identity' : 'Identitas Program Studi'} ({lang === 'EN' ? (program.jenis_prodi === 'Kependidikan' ? 'Educational' : 'Non-Educational') : program.jenis_prodi})
             </h2>
             <p className="mt-0.5 text-sm text-slate-600">
-              {program.nama_pt} — {program.fakultas}
+              {program.nama_pt} — {translateFaculty(program.fakultas, lang)}
             </p>
           </div>
         </div>
@@ -67,11 +74,13 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
           {isReadOnly ? (
             <div className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-medium text-slate-600">
               <Lock className="h-3.5 w-3.5 text-slate-500" />
-              {readOnlyLabel || 'Hanya Baca (Dikunci untuk Peran Ini)'}
+              {readOnlyLabel || (lang === 'EN' ? 'Read-Only (Locked for this Role)' : 'Hanya Baca (Dikunci untuk Peran Ini)')}
             </div>
           ) : (
             <div className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs">
-              <span className="text-slate-600 font-medium">Jenis Instrumen:</span>
+              <span className="text-slate-600 font-medium">
+                {lang === 'EN' ? 'Instrument Type:' : 'Jenis Instrumen:'}
+              </span>
               <select
                 value={program.jenis_prodi}
                 onChange={(e) =>
@@ -79,8 +88,8 @@ export const TabIdentitasProdi: React.FC<TabIdentitasProdiProps> = ({
                 }
                 className="rounded border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-900 focus:outline-none"
               >
-                <option value="Non-Kependidikan">Non-Kependidikan</option>
-                <option value="Kependidikan">Kependidikan</option>
+                <option value="Non-Kependidikan">{lang === 'EN' ? 'Non-Educational' : 'Non-Kependidikan'}</option>
+                <option value="Kependidikan">{lang === 'EN' ? 'Educational' : 'Kependidikan'}</option>
               </select>
             </div>
           )}
